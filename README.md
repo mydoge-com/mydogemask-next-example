@@ -14,11 +14,11 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## API
 
-```js
-const mydogemask = (window as any).doge
+```typescript
+const mydogemask = (window as any).doge;
 
 // Connect to your website
-const result = await mydogemask.connect()
-console.log('connection result', result)
+const result = await mydogemask.connect();
+console.log("connection result", result);
 // { "approved": true, "address": "DBKwBLEDY96jBtx1xCmjfBzp9FrNCWxnmM" }
 ```
