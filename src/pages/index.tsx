@@ -1,5 +1,6 @@
 import Head from "next/head";
 import Image from "next/image";
+import sb from "satoshi-bitcoin";
 import { Inter } from "@next/font/google";
 import styles from "@/styles/Home.module.css";
 import { useCallback, useState } from "react";
@@ -21,10 +22,10 @@ export default function Home() {
         setBtnText(connectReq.address);
         const balanceReq = await mydogemask.getBalance();
         console.log("balance result", balanceReq);
-        setBalance(balanceReq.result);
+        setBalance(sb.toBitcoin(balanceReq.balance));
       }
     }
-  }, [connected, setBtnText, setConnected]);
+  }, [connected, setBalance, setBtnText, setConnected]);
 
   return (
     <>
@@ -57,7 +58,9 @@ export default function Home() {
         <div className={styles.center}>
           <button onClick={onButton}>{btnText}</button>
         </div>
-        {balance !== 0 && <div>Balance: {balance}</div>}
+        {balance !== 0 && (
+          <div className={styles.description}>Balance: {balance}</div>
+        )}
       </main>
     </>
   );

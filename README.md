@@ -18,7 +18,12 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 const mydogemask = (window as any).doge;
 
 // Connect to your website
-const result = await mydogemask.connect();
-console.log("connection result", result);
-// { "approved": true, "address": "DBKwBLEDY96jBtx1xCmjfBzp9FrNCWxnmM" }
+const connectReq = await mydogemask.connect();
+console.log("connection result", connectReq);
+// { "approved": true, "address": "DBKwBLEDY96jBtx1xCmjfBzp9FrNCWxnmM", "balance": "4206912345678" }
+
+// Request connected address balance
+const balanceReq = await mydogemask.getBalance();
+console.log("balance result", balanceReq);
+// { "balance": "4206912345678" }
 ```
