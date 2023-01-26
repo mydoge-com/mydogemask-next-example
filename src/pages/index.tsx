@@ -9,15 +9,19 @@ const inter = Inter({ subsets: ["latin"] });
 export default function Home() {
   const [btnText, setBtnText] = useState("Connect");
   const [connected, setConnected] = useState(false);
+  const [balance, setBalance] = useState(0);
 
   const onButton = useCallback(async () => {
     const mydogemask = (window as any).doge;
     if (!connected) {
-      const result = await mydogemask.connect();
-      console.log("connect result", result);
-      if (result.approved) {
+      const connectReq = await mydogemask.connect();
+      console.log("connect result", connectReq);
+      if (connectReq.approved) {
         setConnected(true);
-        setBtnText(result.address);
+        setBtnText(connectReq.address);
+        const balanceReq = await mydogemask.getBalance();
+        console.log("balance result", balanceReq);
+        setBalance(balanceReq.result);
       }
     }
   }, [connected, setBtnText, setConnected]);
@@ -53,6 +57,7 @@ export default function Home() {
         <div className={styles.center}>
           <button onClick={onButton}>{btnText}</button>
         </div>
+        {balance !== 0 && <div>Balance: {balance}</div>}
       </main>
     </>
   );
