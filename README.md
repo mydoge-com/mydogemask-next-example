@@ -17,13 +17,22 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 ```typescript
 const mydogemask = (window as any).doge;
 
-// Connect to your website
-const connectReq = await mydogemask.connect();
-console.log("connection result", connectReq);
-// { "approved": true, "address": "DBKwBLEDY96jBtx1xCmjfBzp9FrNCWxnmM", "balance": "4206912345678" }
+// Check the extension is installed
+if (mydogemask?.isMyDogeMask) {
+  try {
+    // Each api request supports both promise and callback patterns
 
-// Request connected address balance
-const balanceReq = await mydogemask.getBalance();
-console.log("balance result", balanceReq);
-// { "balance": "4206912345678" }
+    // Connect to your website
+    const connectReq = await mydogemask.connect(/*onSuccess, onError*/);
+    console.log("connection result", connectReq);
+    // { "approved": true, "address": "DBKwBLEDY96jBtx1xCmjfBzp9FrNCWxnmM", "balance": "4206912345678" }
+
+    // Request connected address balance
+    const balanceReq = await mydogemask.getBalance(/*onSuccess, onError*/);
+    console.log("balance result", balanceReq);
+    // { "balance": "4206912345678" }
+  } catch (e) {
+    console.error(e);
+  }
+}
 ```
