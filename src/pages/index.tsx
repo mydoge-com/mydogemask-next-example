@@ -96,7 +96,7 @@ export default function Home() {
         <div className={styles.center}>
           <button onClick={onConnect}>{btnText}</button>
         </div>
-        {balance !== 0 && (
+        {connected && (
           <div className={styles.description}>Balance: {balance}</div>
         )}
         {connected && (
