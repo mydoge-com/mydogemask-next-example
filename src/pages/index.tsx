@@ -15,14 +15,18 @@ export default function Home() {
   const onButton = useCallback(async () => {
     const mydogemask = (window as any).doge;
     if (!connected) {
-      const connectReq = await mydogemask.connect();
-      console.log("connect result", connectReq);
-      if (connectReq.approved) {
-        setConnected(true);
-        setBtnText(connectReq.address);
-        const balanceReq = await mydogemask.getBalance();
-        console.log("balance result", balanceReq);
-        setBalance(sb.toBitcoin(balanceReq.balance));
+      try {
+        const connectReq = await mydogemask.connect();
+        console.log("connect result", connectReq);
+        if (connectReq.approved) {
+          setConnected(true);
+          setBtnText(connectReq.address);
+          const balanceReq = await mydogemask.getBalance();
+          console.log("balance result", balanceReq);
+          setBalance(sb.toBitcoin(balanceReq.balance));
+        }
+      } catch (e) {
+        console.error(e);
       }
     }
   }, [connected, setBalance, setBtnText, setConnected]);
