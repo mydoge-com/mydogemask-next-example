@@ -10,6 +10,7 @@ const inter = Inter({ subsets: ['latin'] });
 export default function Home() {
   const [btnText, setBtnText] = useState('Connect');
   const [connected, setConnected] = useState(false);
+  const [address, setAddress] = useState(false);
   const [balance, setBalance] = useState(0);
 
   const onConnect = useCallback(async () => {
@@ -21,7 +22,13 @@ export default function Home() {
     }
 
     if (connected) {
-      alert(`MyDogeMask already connected!`);
+      const disconnectRes = await mydogemask.disconnect();
+      console.log('disconnect result', disconnectRes);
+      if (disconnectRes.disconnected) {
+        setConnected(false);
+        setAddress(false);
+        setBtnText('Connect');
+      }
       return;
     }
 
@@ -30,7 +37,8 @@ export default function Home() {
       console.log('connect result', connectRes);
       if (connectRes.approved) {
         setConnected(true);
-        setBtnText(connectRes.address);
+        setAddress(connectRes.address);
+        setBtnText('Disconnect');
 
         const balanceRes = await mydogemask.getBalance();
         console.log('balance result', balanceRes);
@@ -39,7 +47,7 @@ export default function Home() {
     } catch (e) {
       console.error(e);
     }
-  }, [connected, setBalance, setBtnText, setConnected]);
+  }, [connected]);
 
   const onTip = useCallback(async () => {
     const mydogemask = (window as any).doge;
@@ -96,9 +104,8 @@ export default function Home() {
         <div className={styles.center}>
           <button onClick={onConnect}>{btnText}</button>
         </div>
-        {connected && (
-          <div className={styles.description}>Balance: {balance}</div>
-        )}
+        {connected && <div className={styles.address}>Address: {address}</div>}
+        {connected && <div className={styles.balance}>Balance: {balance}</div>}
         {connected && (
           <div className={styles.center}>
             <button onClick={onTip}>Tip MyDogeOfficial 4.20</button>

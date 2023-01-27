@@ -26,7 +26,7 @@ if (mydogemask?.isMyDogeMask) {
 
     // Connect to your website
     const connectRes = await mydogemask.connect(/*onSuccess, onError*/);
-    console.log('connection result', connectRes);
+    console.log('connect result', connectRes);
     // { "approved": true, "address": "DBKwBLEDY96jBtx1xCmjfBzp9FrNCWxnmM", "balance": "4206912345678" }
 
     // Request connected address balance
@@ -45,6 +45,11 @@ if (mydogemask?.isMyDogeMask) {
     );
     console.log('request transaction result', txReqRes);
     // { "txId": "b9fc04f226b194684fe24c786be89cae26abf8fcebbf90ff7049d5bc7fa003f0" }
+
+    // Disconnect the currently connected address
+    const disconnectRes = await mydogemask.disconnect(/*onSuccess, onError*/);
+    console.log('disconnect result', disconnectRes);
+    // { "disconnected": true }
   } catch (e) {
     console.error(e);
   }
