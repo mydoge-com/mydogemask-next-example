@@ -63,7 +63,7 @@ export default function Home() {
     } catch (e) {
       console.error(e);
     }
-  }, [connected, setBalance, setBtnText, setConnected]);
+  }, [connected]);
 
   return (
     <>
