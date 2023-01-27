@@ -23,14 +23,26 @@ if (mydogemask?.isMyDogeMask) {
     // Each api request supports both promise and callback patterns
 
     // Connect to your website
-    const connectReq = await mydogemask.connect(/*onSuccess, onError*/);
-    console.log("connection result", connectReq);
+    const connectRes = await mydogemask.connect(/*onSuccess, onError*/);
+    console.log('connection result', connectRes);
     // { "approved": true, "address": "DBKwBLEDY96jBtx1xCmjfBzp9FrNCWxnmM", "balance": "4206912345678" }
 
     // Request connected address balance
-    const balanceReq = await mydogemask.getBalance(/*onSuccess, onError*/);
-    console.log("balance result", balanceReq);
-    // { "balance": "4206912345678" }
+    const balanceRes = await mydogemask.getBalance(/*onSuccess, onError*/);
+    console.log('balance result', balanceRes);
+    // { "address": "DBKwBLEDY96jBtx1xCmjfBzp9FrNCWxnmM", "balance": "4206912345678" }
+
+    // Generates a transaction popup, to be confirmed by the user
+    const txReqRes = await mydogemask.requestTransaction(
+      {
+        recipientAddress: 'DAHkCF5LajV6jYyi5o4eMvtpqXRcm9eZYq',
+        dogeAmount: 4.2,
+      }
+      // onSuccess,
+      // onError
+    );
+    console.log('request transaction result', txReqRes);
+    // { "txId": "b9fc04f226b194684fe24c786be89cae26abf8fcebbf90ff7049d5bc7fa003f0" }
   } catch (e) {
     console.error(e);
   }
