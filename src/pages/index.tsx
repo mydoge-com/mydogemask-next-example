@@ -43,6 +43,20 @@ export default function Home() {
         const balanceRes = await mydogemask.getBalance();
         console.log('balance result', balanceRes);
         setBalance(sb.toBitcoin(balanceRes.balance));
+
+        let interval = setInterval(async () => {
+          const connectionStatusRes = await mydogemask
+            .getConnectionStatus()
+            .catch(console.error);
+          console.log('connection status result', connectionStatusRes);
+
+          if (!connectionStatusRes?.connected) {
+            clearInterval(interval);
+            setConnected(false);
+            setAddress(false);
+            setBtnText('Connect');
+          }
+        }, 5000);
       }
     } catch (e) {
       console.error(e);

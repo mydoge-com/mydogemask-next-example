@@ -29,6 +29,15 @@ if (mydogemask?.isMyDogeMask) {
     console.log('connect result', connectRes);
     // { "approved": true, "address": "DBKwBLEDY96jBtx1xCmjfBzp9FrNCWxnmM", "balance": "4206912345678" }
 
+    // Check if the user has disconnected
+    // Note: this method will throw an error if the user has disconnected
+    // Handle disconnect by catching the rejected promise or within onError callback
+    const connectRes = await mydogemask
+      .getConnectionStatus(/*onSuccess, onError*/)
+      .catch(console.error);
+    console.log('connection status result', connectionStatusRes);
+    // { "connected": true, "address": "DBKwBLEDY96jBtx1xCmjfBzp9FrNCWxnmM" }
+
     // Request connected address balance
     const balanceRes = await mydogemask.getBalance(/*onSuccess, onError*/);
     console.log('balance result', balanceRes);
