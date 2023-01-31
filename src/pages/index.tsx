@@ -68,6 +68,23 @@ export default function Home() {
         dogeAmount: 4.2,
       });
       console.log('request transaction result', txReqRes);
+      // Poll until transaction is confirmed
+      let interval = setInterval(async () => {
+        const txStatusRes = await mydogemask.getTransactionStatus({
+          txId: txReqRes.txId,
+        });
+        console.log('transaction status result', txStatusRes);
+        // Once confirmed, stop polling and update balance
+        if (
+          txStatusRes.status === 'confirmed' &&
+          txStatusRes.confirmations > 1
+        ) {
+          clearInterval(interval);
+          const balanceRes = await mydogemask.getBalance();
+          console.log('balance result', balanceRes);
+          setBalance(sb.toBitcoin(balanceRes.balance));
+        }
+      }, 10000);
     } catch (e) {
       console.error(e);
     }

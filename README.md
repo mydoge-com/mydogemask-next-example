@@ -46,6 +46,15 @@ if (mydogemask?.isMyDogeMask) {
     console.log('request transaction result', txReqRes);
     // { "txId": "b9fc04f226b194684fe24c786be89cae26abf8fcebbf90ff7049d5bc7fa003f0" }
 
+    // Poll to get the transaction status
+    let interval = setInterval(async () => {
+      const txStatusRes = await mydogemask.getTransactionStatus({
+        txId: txReqRes.txId,
+      });
+      console.log('transaction status result', txStatusRes);
+      // { "txId": "b9fc04f226b194684fe24c786be89cae26abf8fcebbf90ff7049d5bc7fa003f0", "confirmations": 0, dogeAmount: "420000000", "blockTime": 1675217503, "status": "pending" }
+    }, 10000);
+
     // Disconnect the currently connected address
     const disconnectRes = await mydogemask.disconnect(/*onSuccess, onError*/);
     console.log('disconnect result', disconnectRes);
