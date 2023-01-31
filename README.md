@@ -32,7 +32,7 @@ if (mydogemask?.isMyDogeMask) {
     // Check if the user has disconnected
     // Note: this method will throw an error if the user has disconnected
     // Handle disconnect by catching the rejected promise or within onError callback
-    const connectRes = await mydogemask
+    const connectionStatusRes = await mydogemask
       .getConnectionStatus(/*onSuccess, onError*/)
       .catch(console.error);
     console.log('connection status result', connectionStatusRes);
@@ -61,7 +61,13 @@ if (mydogemask?.isMyDogeMask) {
         txId: txReqRes.txId,
       });
       console.log('transaction status result', txStatusRes);
-      // { "txId": "b9fc04f226b194684fe24c786be89cae26abf8fcebbf90ff7049d5bc7fa003f0", "confirmations": 0, dogeAmount: "420000000", "blockTime": 1675217503, "status": "pending" }
+      /* { 
+            "txId": "b9fc04f226b194684fe24c786be89cae26abf8fcebbf90ff7049d5bc7fa003f0", 
+            "confirmations": 0, 
+            "dogeAmount": "420000000", 
+            "blockTime": 1675217503, 
+            "status": "pending" 
+         }*/
     }, 10000);
 
     // Disconnect the currently connected address
