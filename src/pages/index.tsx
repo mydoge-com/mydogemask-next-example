@@ -3,7 +3,7 @@ import Image from 'next/image';
 import sb from 'satoshi-bitcoin';
 import { Inter } from '@next/font/google';
 import styles from '@/styles/Home.module.css';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -12,18 +12,26 @@ export default function Home() {
   const [connected, setConnected] = useState(false);
   const [address, setAddress] = useState(false);
   const [balance, setBalance] = useState(0);
+  const [myDogeMask, setMyDogeMask] = useState<any>();
+
+  useEffect(() => {
+    function onInit() {
+      const { doge } = window as any;
+      setMyDogeMask(doge);
+      window.removeEventListener('doge#initialized', onInit);
+    }
+    window.addEventListener('doge#initialized', onInit, { once: true });
+  }, []);
 
   const onConnect = useCallback(async () => {
-    const mydogemask = (window as any).doge;
-
-    if (!mydogemask?.isMyDogeMask) {
+    if (!myDogeMask?.isMyDogeMask) {
       alert(`MyDogeMask not installed!`);
       return;
     }
 
     try {
       if (connected) {
-        const disconnectRes = await mydogemask.disconnect();
+        const disconnectRes = await myDogeMask.disconnect();
         console.log('disconnect result', disconnectRes);
         if (disconnectRes.disconnected) {
           setConnected(false);
@@ -33,19 +41,19 @@ export default function Home() {
         return;
       }
 
-      const connectRes = await mydogemask.connect();
+      const connectRes = await myDogeMask.connect();
       console.log('connect result', connectRes);
       if (connectRes.approved) {
         setConnected(true);
         setAddress(connectRes.address);
         setBtnText('Disconnect');
 
-        const balanceRes = await mydogemask.getBalance();
+        const balanceRes = await myDogeMask.getBalance();
         console.log('balance result', balanceRes);
         setBalance(sb.toBitcoin(balanceRes.balance));
 
         let interval = setInterval(async () => {
-          const connectionStatusRes = await mydogemask
+          const connectionStatusRes = await myDogeMask
             .getConnectionStatus()
             .catch(console.error);
           console.log('connection status result', connectionStatusRes);
@@ -61,12 +69,10 @@ export default function Home() {
     } catch (e) {
       console.error(e);
     }
-  }, [connected]);
+  }, [connected, myDogeMask]);
 
   const onTip = useCallback(async () => {
-    const mydogemask = (window as any).doge;
-
-    if (!mydogemask?.isMyDogeMask) {
+    if (!myDogeMask?.isMyDogeMask) {
       alert(`MyDogeMask not installed!`);
       return;
     }
@@ -77,14 +83,14 @@ export default function Home() {
     }
 
     try {
-      const txReqRes = await mydogemask.requestTransaction({
+      const txReqRes = await myDogeMask.requestTransaction({
         recipientAddress: 'DAHkCF5LajV6jYyi5o4eMvtpqXRcm9eZYq',
         dogeAmount: 4.2,
       });
       console.log('request transaction result', txReqRes);
       // Poll until transaction is confirmed
       let interval = setInterval(async () => {
-        const txStatusRes = await mydogemask.getTransactionStatus({
+        const txStatusRes = await myDogeMask.getTransactionStatus({
           txId: txReqRes.txId,
         });
         console.log('transaction status result', txStatusRes);
@@ -94,7 +100,7 @@ export default function Home() {
           txStatusRes.confirmations > 1
         ) {
           clearInterval(interval);
-          const balanceRes = await mydogemask.getBalance();
+          const balanceRes = await myDogeMask.getBalance();
           console.log('balance result', balanceRes);
           setBalance(sb.toBitcoin(balanceRes.balance));
         }
@@ -102,7 +108,7 @@ export default function Home() {
     } catch (e) {
       console.error(e);
     }
-  }, [connected]);
+  }, [connected, myDogeMask]);
 
   return (
     <>
@@ -116,7 +122,7 @@ export default function Home() {
         <div className={styles.description}>
           <div>
             <a
-              href='https://github.com/mydoge-com/mydogemask'
+              href='https://github.com/mydoge-com/myDogeMask'
               target='_blank'
               rel='noopener noreferrer'
             >
