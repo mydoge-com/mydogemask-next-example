@@ -28,7 +28,7 @@ window.addEventListener(
   { once: true }
 );
 
-// Check the extension is installed
+// Check the extension interface is set and is MyDogeMask
 if (myDogeMask?.isMyDogeMask) {
   try {
     // Each api request supports both promise and callback patterns
@@ -36,7 +36,11 @@ if (myDogeMask?.isMyDogeMask) {
     // Connect to your website
     const connectRes = await myDogeMask.connect(/*onSuccess, onError*/);
     console.log('connect result', connectRes);
-    // { "approved": true, "address": "DBKwBLEDY96jBtx1xCmjfBzp9FrNCWxnmM", "balance": "4206912345678" }
+    /*{
+        "approved": true,
+        "address": "DBKwBLEDY96jBtx1xCmjfBzp9FrNCWxnmM",
+        "balance": "4206912345678"
+      }*/
 
     // Check if the user has disconnected
     // Note: this method will throw an error if the user has disconnected
