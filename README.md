@@ -42,15 +42,6 @@ if (myDogeMask?.isMyDogeMask) {
         "balance": "4206912345678"
       }*/
 
-    // Check if the user has disconnected
-    // Note: this method will throw an error if the user has disconnected
-    // Handle disconnect by catching the rejected promise or within onError callback
-    const connectionStatusRes = await myDogeMask
-      .getConnectionStatus(/*onSuccess, onError*/)
-      .catch(console.error);
-    console.log('connection status result', connectionStatusRes);
-    // { "connected": true, "address": "DBKwBLEDY96jBtx1xCmjfBzp9FrNCWxnmM" }
-
     // Request connected address balance
     const balanceRes = await myDogeMask.getBalance(/*onSuccess, onError*/);
     console.log('balance result', balanceRes);
@@ -69,7 +60,7 @@ if (myDogeMask?.isMyDogeMask) {
     // { "txId": "b9fc04f226b194684fe24c786be89cae26abf8fcebbf90ff7049d5bc7fa003f0" }
 
     // Poll to get the transaction status
-    let interval = setInterval(async () => {
+    setInterval(async () => {
       const txStatusRes = await myDogeMask.getTransactionStatus({
         txId: txReqRes.txId,
       });
@@ -83,7 +74,18 @@ if (myDogeMask?.isMyDogeMask) {
         }*/
     }, 10000);
 
-    // Disconnect the currently connected address
+    // Poll to check if the user has disconnected from the extension
+    // Note: this method will throw an error if the user has disconnected
+    // Handle disconnect by catching the rejected promise or within onError callback
+    setInterval(async () => {
+      const connectionStatusRes = await myDogeMask
+        .getConnectionStatus(/*onSuccess, onError*/)
+        .catch(console.error);
+      console.log('connection status result', connectionStatusRes);
+      // { "connected": true, "address": "DBKwBLEDY96jBtx1xCmjfBzp9FrNCWxnmM" }
+    }, 10000);
+
+    // Disconnect the connected address manually
     const disconnectRes = await myDogeMask.disconnect(/*onSuccess, onError*/);
     console.log('disconnect result', disconnectRes);
     // { "disconnected": true }
