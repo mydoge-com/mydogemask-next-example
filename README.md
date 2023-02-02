@@ -34,6 +34,8 @@ if (myDogeMask?.isMyDogeMask) {
     // Each api request supports both promise and callback patterns
 
     // Connect to your website
+    // Generates a popup to be confirmed by the user
+    // Promise will reject or onError will be called if canceled
     const connectRes = await myDogeMask.connect(/*onSuccess, onError*/);
     console.log('connect result', connectRes);
     /*{
@@ -47,7 +49,9 @@ if (myDogeMask?.isMyDogeMask) {
     console.log('balance result', balanceRes);
     // { "address": "DBKwBLEDY96jBtx1xCmjfBzp9FrNCWxnmM", "balance": "4206912345678" }
 
-    // Generates a transaction popup, to be confirmed by the user
+    // Send a transaction
+    // Generates a popup to be confirmed by the user
+    // Promise will reject or onError will be called if canceled
     const txReqRes = await myDogeMask.requestTransaction(
       {
         recipientAddress: 'DAHkCF5LajV6jYyi5o4eMvtpqXRcm9eZYq',
@@ -75,14 +79,17 @@ if (myDogeMask?.isMyDogeMask) {
     }, 10000);
 
     // Poll to check if the user has disconnected from the extension
-    // Note: this method will throw an error if the user has disconnected
-    // Handle disconnect by catching the rejected promise or within onError callback
+    // Promise will reject or onError will be called if the wallet is disconnected
     setInterval(async () => {
       const connectionStatusRes = await myDogeMask
         .getConnectionStatus(/*onSuccess, onError*/)
         .catch(console.error);
       console.log('connection status result', connectionStatusRes);
       // { "connected": true, "address": "DBKwBLEDY96jBtx1xCmjfBzp9FrNCWxnmM" }
+      
+      if (!connectionStatusRes) {
+        console.log('disconnected')   
+      }
     }, 10000);
 
     // Disconnect the connected address manually
