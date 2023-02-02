@@ -21,18 +21,18 @@ export default function Home() {
       return;
     }
 
-    if (connected) {
-      const disconnectRes = await mydogemask.disconnect();
-      console.log('disconnect result', disconnectRes);
-      if (disconnectRes.disconnected) {
-        setConnected(false);
-        setAddress(false);
-        setBtnText('Connect');
-      }
-      return;
-    }
-
     try {
+      if (connected) {
+        const disconnectRes = await mydogemask.disconnect();
+        console.log('disconnect result', disconnectRes);
+        if (disconnectRes.disconnected) {
+          setConnected(false);
+          setAddress(false);
+          setBtnText('Connect');
+        }
+        return;
+      }
+
       const connectRes = await mydogemask.connect();
       console.log('connect result', connectRes);
       if (connectRes.approved) {

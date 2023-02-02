@@ -1759,7 +1759,7 @@ safe-regex-test@^1.0.0:
     get-intrinsic "^1.1.3"
     is-regex "^1.1.4"
 
-satoshi-bitcoin@^1.0.5:
+satoshi-bitcoin@1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/satoshi-bitcoin/-/satoshi-bitcoin-1.0.5.tgz#d2a2b12dd904715e4ca17e17493ffff75ce2af72"
   integrity sha512-iCUOSe8yTOqetYcj/n4ziv0psqRMRZT4+YhcMrQIYpjnx3Pgn9uiTlaUItNMMB/0sldINEGkJvxwTW55OfrYPg==
