@@ -87,7 +87,7 @@ if (myDogeMask?.isMyDogeMask) {
       console.log('connection status result', connectionStatusRes);
       // { "connected": true, "address": "DBKwBLEDY96jBtx1xCmjfBzp9FrNCWxnmM" }
       
-      if (!connectionStatusRes) {
+      if (!connectionStatusRes?.connected) {
         console.log('disconnected')   
       }
     }, 10000);
