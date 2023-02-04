@@ -4,7 +4,7 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## Getting Started
 
-1. Install MyDogeMask from the [chrome store]() or [from source](https://github.com/mydoge-com/myDogeMask).
+1. Install MyDogeMask from the [chrome store](https://chrome.google.com/webstore/detail/mydogemask/mljponncmhdlacmjbophphkbgcgjdnff) or [from source](https://github.com/mydoge-com/myDogeMask).
 
 2. Run the development server:
 
