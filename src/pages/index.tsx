@@ -101,7 +101,7 @@ export default function Home() {
   }, [connected, myDogeMask]);
 
   const txStatus = useCallback(async () => {
-    if (txId !== '') {
+    if (txId) {
       const txStatusRes = await myDogeMask.getTransactionStatus({
         txId,
       });
