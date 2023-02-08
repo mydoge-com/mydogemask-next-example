@@ -3,7 +3,9 @@ import Image from 'next/image';
 import sb from 'satoshi-bitcoin';
 import { Inter } from '@next/font/google';
 import styles from '@/styles/Home.module.css';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+import { useInterval } from '../hooks/useInterval';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -12,6 +14,7 @@ export default function Home() {
   const [connected, setConnected] = useState(false);
   const [address, setAddress] = useState(false);
   const [balance, setBalance] = useState(0);
+  const [txId, setTxId] = useState('');
   const [myDogeMask, setMyDogeMask] = useState<any>();
 
   useEffect(() => {
@@ -51,25 +54,28 @@ export default function Home() {
         const balanceRes = await myDogeMask.getBalance();
         console.log('balance result', balanceRes);
         setBalance(sb.toBitcoin(balanceRes.balance));
-
-        let interval = setInterval(async () => {
-          const connectionStatusRes = await myDogeMask
-            .getConnectionStatus()
-            .catch(console.error);
-          console.log('connection status result', connectionStatusRes);
-
-          if (!connectionStatusRes?.connected) {
-            clearInterval(interval);
-            setConnected(false);
-            setAddress(false);
-            setBtnText('Connect');
-          }
-        }, 5000);
       }
     } catch (e) {
       console.error(e);
     }
   }, [connected, myDogeMask]);
+
+  const checkConnection = useCallback(async () => {
+    if (connected) {
+      const connectionStatusRes = await myDogeMask
+        .getConnectionStatus()
+        .catch(console.error);
+      console.log('connection status result', connectionStatusRes);
+
+      if (!connectionStatusRes?.connected) {
+        setConnected(false);
+        setAddress(false);
+        setBtnText('Connect');
+      }
+    }
+  }, [connected, myDogeMask]);
+
+  useInterval(checkConnection, 5000, false);
 
   const onTip = useCallback(async () => {
     if (!myDogeMask?.isMyDogeMask) {
@@ -88,27 +94,29 @@ export default function Home() {
         dogeAmount: 4.2,
       });
       console.log('request transaction result', txReqRes);
-      // Poll until transaction is confirmed
-      let interval = setInterval(async () => {
-        const txStatusRes = await myDogeMask.getTransactionStatus({
-          txId: txReqRes.txId,
-        });
-        console.log('transaction status result', txStatusRes);
-        // Once confirmed, stop polling and update balance
-        if (
-          txStatusRes.status === 'confirmed' &&
-          txStatusRes.confirmations > 1
-        ) {
-          clearInterval(interval);
-          const balanceRes = await myDogeMask.getBalance();
-          console.log('balance result', balanceRes);
-          setBalance(sb.toBitcoin(balanceRes.balance));
-        }
-      }, 10000);
+      setTxId(txReqRes.txId);
     } catch (e) {
       console.error(e);
     }
   }, [connected, myDogeMask]);
+
+  const txStatus = useCallback(async () => {
+    if (txId !== '') {
+      const txStatusRes = await myDogeMask.getTransactionStatus({
+        txId,
+      });
+      console.log('transaction status result', txStatusRes);
+      // Once confirmed, stop polling and update balance
+      if (txStatusRes.status === 'confirmed' && txStatusRes.confirmations > 1) {
+        const balanceRes = await myDogeMask.getBalance();
+        console.log('balance result', balanceRes);
+        setBalance(sb.toBitcoin(balanceRes.balance));
+        setTxId('');
+      }
+    }
+  }, [myDogeMask, txId]);
+
+  useInterval(txStatus, 10000, false);
 
   return (
     <>
