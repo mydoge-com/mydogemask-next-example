@@ -8,6 +8,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useInterval } from '../hooks/useInterval';
 
 const inter = Inter({ subsets: ['latin'] });
+const MDO_ADDRESS = 'DAHkCF5LajV6jYyi5o4eMvtpqXRcm9eZYq';
 
 export default function Home() {
   const [btnText, setBtnText] = useState('Connect');
@@ -15,6 +16,11 @@ export default function Home() {
   const [address, setAddress] = useState(false);
   const [balance, setBalance] = useState(0);
   const [txId, setTxId] = useState('');
+  const [doginalOutput, setDoginalOutput] = useState(
+    'c788a88a04a649a5ba049ee7b23ce337a7304d1d0d37cc46108767095fb2d01a:0'
+  );
+  const [recipientAddress, setRecipientAddress] = useState(MDO_ADDRESS);
+  const [doginalOutputValue, setDoginalOutputValue] = useState(100000);
   const [myDogeMask, setMyDogeMask] = useState<any>();
 
   useEffect(() => {
@@ -90,7 +96,7 @@ export default function Home() {
 
     try {
       const txReqRes = await myDogeMask.requestTransaction({
-        recipientAddress: 'DAHkCF5LajV6jYyi5o4eMvtpqXRcm9eZYq',
+        recipientAddress: MDO_ADDRESS,
         dogeAmount: 4.2,
       });
       console.log('request transaction result', txReqRes);
@@ -99,6 +105,36 @@ export default function Home() {
       console.error(e);
     }
   }, [connected, myDogeMask]);
+
+  const onSendDoginal = useCallback(async () => {
+    if (!myDogeMask?.isMyDogeMask) {
+      alert(`MyDogeMask not installed!`);
+      return;
+    }
+
+    if (!connected) {
+      alert(`MyDogeMask not connected!`);
+      return;
+    }
+
+    try {
+      const txReqRes = await myDogeMask.requestDoginalTransaction({
+        recipientAddress,
+        output: doginalOutput,
+        outputValue: doginalOutputValue,
+      });
+      console.log('request doginal transaction result', txReqRes);
+      setTxId(txReqRes.txId);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [
+    connected,
+    myDogeMask,
+    recipientAddress,
+    doginalOutput,
+    doginalOutputValue,
+  ]);
 
   const txStatus = useCallback(async () => {
     if (txId) {
@@ -154,6 +190,42 @@ export default function Home() {
         {connected && (
           <div className={styles.center}>
             <button onClick={onTip}>Tip MyDogeOfficial 4.20</button>
+          </div>
+        )}
+        {connected && (
+          <div className={styles.doginals}>
+            <div className={styles.center}>Doginal inscription output</div>
+            <input
+              type='text'
+              style={{ width: '485px' }}
+              value={doginalOutput}
+              onChange={(text) => {
+                setDoginalOutput(text.target.value);
+              }}
+            />
+            <div className={styles.center}>Doginal output value</div>
+            <input
+              type='text'
+              style={{ width: '50px' }}
+              value={doginalOutputValue}
+              onChange={(text) => {
+                if (!isNaN(Number(text.target.value))) {
+                  setDoginalOutputValue(Number(text.target.value));
+                }
+              }}
+            />
+            <div className={styles.center}>Doginal recipient address</div>
+            <input
+              type='text'
+              style={{ width: '265px' }}
+              value={recipientAddress}
+              onChange={(text) => {
+                setRecipientAddress(text.target.value);
+              }}
+            />
+            <div className={styles.center}>
+              <button onClick={onSendDoginal}>Send Doginal</button>
+            </div>
           </div>
         )}
       </main>

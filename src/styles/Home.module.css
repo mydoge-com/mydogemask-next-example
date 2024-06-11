@@ -54,6 +54,13 @@
   align-items: center;
 }
 
+.doginals {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
 /* Mobile */
 @media (max-width: 700px) {
   .content {
