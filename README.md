@@ -63,6 +63,22 @@ if (myDogeMask?.isMyDogeMask) {
     console.log('request transaction result', txReqRes);
     // { "txId": "b9fc04f226b194684fe24c786be89cae26abf8fcebbf90ff7049d5bc7fa003f0" }
 
+    // Send a doginal inscription
+    // Generates a popup to be confirmed by the user
+    // Promise will reject or onError will be called if canceled
+    const txReqRes = await myDogeMask.requestDoginalTransaction(
+      {
+        recipientAddress: 'DAHkCF5LajV6jYyi5o4eMvtpqXRcm9eZYq',
+        output:
+          'c788a88a04a649a5ba049ee7b23ce337a7304d1d0d37cc46108767095fb2d01a:0', // The transaction id and output index separated by colon
+        outputValue: 100000, // The value of the inscription UTXO in satoshis
+      }
+      // onSuccess,
+      // onError
+    );
+    console.log('request doginal transaction result', txReqRes);
+    // { "txId": "b9fc04f226b194684fe24c786be89cae26abf8fcebbf90ff7049d5bc7fa003f0" }
+
     // Poll to get the transaction status
     setInterval(async () => {
       const txStatusRes = await myDogeMask.getTransactionStatus({
@@ -86,9 +102,9 @@ if (myDogeMask?.isMyDogeMask) {
         .catch(console.error);
       console.log('connection status result', connectionStatusRes);
       // { "connected": true, "address": "DBKwBLEDY96jBtx1xCmjfBzp9FrNCWxnmM" }
-      
+
       if (!connectionStatusRes?.connected) {
-        console.log('disconnected')   
+        console.log('disconnected');
       }
     }, 10000);
 
