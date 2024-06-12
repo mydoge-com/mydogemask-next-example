@@ -20,6 +20,9 @@ export default function Home() {
     'c788a88a04a649a5ba049ee7b23ce337a7304d1d0d37cc46108767095fb2d01a:0'
   );
   const [recipientAddress, setRecipientAddress] = useState(MDO_ADDRESS);
+  const [drc20TIcker, setDrc20Ticker] = useState('');
+  const [drc20Available, setDrc20Available] = useState('');
+  const [drc20Transferable, setDrc20Transferable] = useState('');
   const [myDogeMask, setMyDogeMask] = useState<any>();
 
   useEffect(() => {
@@ -128,6 +131,29 @@ export default function Home() {
     }
   }, [connected, myDogeMask, recipientAddress, doginalOutput]);
 
+  const onGetDRC20Balance = useCallback(async () => {
+    if (!myDogeMask?.isMyDogeMask) {
+      alert(`MyDogeMask not installed!`);
+      return;
+    }
+
+    if (!connected) {
+      alert(`MyDogeMask not connected!`);
+      return;
+    }
+
+    try {
+      const balanceReq = await myDogeMask.getDRC20Balance({
+        ticker: drc20TIcker,
+      });
+      console.log('request drc-20 balance result', balanceReq);
+      setDrc20Available(balanceReq.availableBalance);
+      setDrc20Transferable(balanceReq.transferableBalance);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [connected, myDogeMask, drc20TIcker]);
+
   const txStatus = useCallback(async () => {
     if (txId) {
       const txStatusRes = await myDogeMask.getTransactionStatus({
@@ -207,6 +233,20 @@ export default function Home() {
             <div className={styles.center}>
               <button onClick={onSendDoginal}>Send Doginal</button>
             </div>
+            <div className={styles.center}>DRC-20 Ticker</div>
+            <input
+              type='text'
+              style={{ width: '35px' }}
+              value={drc20TIcker}
+              onChange={(text) => {
+                setDrc20Ticker(text.target.value);
+              }}
+            />
+            <div className={styles.center}>
+              <button onClick={onGetDRC20Balance}>Get DRC-20 Balance</button>
+            </div>
+            {drc20Available && <div className={styles.balance}>Available Balance: {drc20Available}</div>}
+            {drc20Transferable && <div className={styles.balance}>Transferable Balance: {drc20Transferable}</div>}
           </div>
         )}
       </main>
