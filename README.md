@@ -78,6 +78,11 @@ if (myDogeMask?.isMyDogeMask) {
     console.log('request doginal transaction result', txReqRes);
     // { "txId": "b9fc04f226b194684fe24c786be89cae26abf8fcebbf90ff7049d5bc7fa003f0" }
 
+    // Request connected address DRC-20 balance
+    const drc20BalanceRes = await myDogeMask.getDRC20Balance({ ticker: 'abcd', /*onSuccess, onError*/);
+    console.log('drc-20 balance result', drc20BalanceRes);
+    // { "address": "DBKwBLEDY96jBtx1xCmjfBzp9FrNCWxnmM", "availableBalance": "4206912345678", "transferableBalance": "12345678", "ticker": "abcd" }
+
     // Poll to get the transaction status
     setInterval(async () => {
       const txStatusRes = await myDogeMask.getTransactionStatus({
