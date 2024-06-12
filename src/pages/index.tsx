@@ -20,7 +20,6 @@ export default function Home() {
     'c788a88a04a649a5ba049ee7b23ce337a7304d1d0d37cc46108767095fb2d01a:0'
   );
   const [recipientAddress, setRecipientAddress] = useState(MDO_ADDRESS);
-  const [doginalOutputValue, setDoginalOutputValue] = useState(100000);
   const [myDogeMask, setMyDogeMask] = useState<any>();
 
   useEffect(() => {
@@ -121,20 +120,13 @@ export default function Home() {
       const txReqRes = await myDogeMask.requestDoginalTransaction({
         recipientAddress,
         output: doginalOutput,
-        outputValue: doginalOutputValue,
       });
       console.log('request doginal transaction result', txReqRes);
       setTxId(txReqRes.txId);
     } catch (e) {
       console.error(e);
     }
-  }, [
-    connected,
-    myDogeMask,
-    recipientAddress,
-    doginalOutput,
-    doginalOutputValue,
-  ]);
+  }, [connected, myDogeMask, recipientAddress, doginalOutput]);
 
   const txStatus = useCallback(async () => {
     if (txId) {
@@ -201,17 +193,6 @@ export default function Home() {
               value={doginalOutput}
               onChange={(text) => {
                 setDoginalOutput(text.target.value);
-              }}
-            />
-            <div className={styles.center}>Doginal output value</div>
-            <input
-              type='text'
-              style={{ width: '50px' }}
-              value={doginalOutputValue}
-              onChange={(text) => {
-                if (!isNaN(Number(text.target.value))) {
-                  setDoginalOutputValue(Number(text.target.value));
-                }
               }}
             />
             <div className={styles.center}>Doginal recipient address</div>

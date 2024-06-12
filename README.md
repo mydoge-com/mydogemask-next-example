@@ -71,7 +71,6 @@ if (myDogeMask?.isMyDogeMask) {
         recipientAddress: 'DAHkCF5LajV6jYyi5o4eMvtpqXRcm9eZYq',
         output:
           'c788a88a04a649a5ba049ee7b23ce337a7304d1d0d37cc46108767095fb2d01a:0', // The transaction id and output index separated by colon
-        outputValue: 100000, // The value of the inscription UTXO in satoshis
       }
       // onSuccess,
       // onError
