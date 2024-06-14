@@ -63,10 +63,10 @@ if (myDogeMask?.isMyDogeMask) {
     console.log('request transaction result', txReqRes);
     // { "txId": "b9fc04f226b194684fe24c786be89cae26abf8fcebbf90ff7049d5bc7fa003f0" }
 
-    // Send a doginal inscription
+    // Send an inscription doginal/drc-20
     // Generates a popup to be confirmed by the user
     // Promise will reject or onError will be called if canceled
-    const txReqRes = await myDogeMask.requestDoginalTransaction(
+    const txReqRes = await myDogeMask.requesInscriptionTransaction(
       {
         recipientAddress: 'DAHkCF5LajV6jYyi5o4eMvtpqXRcm9eZYq',
         output:
@@ -75,7 +75,7 @@ if (myDogeMask?.isMyDogeMask) {
       // onSuccess,
       // onError
     );
-    console.log('request doginal transaction result', txReqRes);
+    console.log('request inscription transaction result', txReqRes);
     // { "txId": "b9fc04f226b194684fe24c786be89cae26abf8fcebbf90ff7049d5bc7fa003f0" }
 
     // Request connected address DRC-20 balance

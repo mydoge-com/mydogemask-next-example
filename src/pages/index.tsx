@@ -23,6 +23,7 @@ export default function Home() {
   const [drc20Ticker, setDrc20Ticker] = useState('');
   const [drc20Available, setDrc20Available] = useState('');
   const [drc20Transferable, setDrc20Transferable] = useState('');
+  const [drc20Inscriptions, setDrc20Inscriptions] = useState<any[]>([]);
   const [drc20Amount, setDrc20Amount] = useState('');
   const [myDogeMask, setMyDogeMask] = useState<any>();
 
@@ -86,16 +87,22 @@ export default function Home() {
 
   useInterval(checkConnection, 5000, false);
 
-  const onTip = useCallback(async () => {
+  const isConnected = useCallback(() => {
     if (!myDogeMask?.isMyDogeMask) {
       alert(`MyDogeMask not installed!`);
-      return;
+      return false;
     }
 
     if (!connected) {
       alert(`MyDogeMask not connected!`);
-      return;
+      return false;
     }
+
+    return true;
+  }, [connected, myDogeMask]);
+
+  const onTip = useCallback(async () => {
+    if (!isConnected()) return;
 
     try {
       const txReqRes = await myDogeMask.requestTransaction({
@@ -107,18 +114,10 @@ export default function Home() {
     } catch (e) {
       console.error(e);
     }
-  }, [connected, myDogeMask]);
+  }, [isConnected, myDogeMask]);
 
   const onSendDoginal = useCallback(async () => {
-    if (!myDogeMask?.isMyDogeMask) {
-      alert(`MyDogeMask not installed!`);
-      return;
-    }
-
-    if (!connected) {
-      alert(`MyDogeMask not connected!`);
-      return;
-    }
+    if (!isConnected()) return;
 
     try {
       const txReqRes = await myDogeMask.requestDoginalTransaction({
@@ -130,18 +129,10 @@ export default function Home() {
     } catch (e) {
       console.error(e);
     }
-  }, [connected, myDogeMask, recipientAddress, doginalOutput]);
+  }, [isConnected, myDogeMask, recipientAddress, doginalOutput]);
 
   const onGetDRC20Balance = useCallback(async () => {
-    if (!myDogeMask?.isMyDogeMask) {
-      alert(`MyDogeMask not installed!`);
-      return;
-    }
-
-    if (!connected) {
-      alert(`MyDogeMask not connected!`);
-      return;
-    }
+    if (!isConnected()) return;
 
     try {
       const balanceReq = await myDogeMask.getDRC20Balance({
@@ -153,33 +144,36 @@ export default function Home() {
     } catch (e) {
       console.error(e);
     }
-  }, [connected, myDogeMask, drc20Ticker]);
+  }, [isConnected, myDogeMask, drc20Ticker]);
 
-  const onTransferDRC20 = useCallback(
-    async (available) => {
-      if (!myDogeMask?.isMyDogeMask) {
-        alert(`MyDogeMask not installed!`);
-        return;
-      }
+  const onGetDRC20Inscriptions = useCallback(async () => {
+    if (!isConnected()) return;
 
-      if (!connected) {
-        alert(`MyDogeMask not connected!`);
-        return;
-      }
+    try {
+      const transferableReq = await myDogeMask.getTransferableDRC20({
+        ticker: drc20Ticker,
+      });
+      console.log('request drc-20 transferable result', transferableReq);
+      setDrc20Inscriptions(transferableReq.inscriptions);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [isConnected, myDogeMask, drc20Ticker]);
 
-      try {
-        const txReqRes = await myDogeMask.requestAvailableDRC20Transaction({
-          ticker: drc20Ticker,
-          amount: drc20Amount,
-        });
-        console.log('request available drc-20 transfer result', txReqRes);
-        setTxId(txReqRes.txId);
-      } catch (e) {
-        console.error(e);
-      }
-    },
-    [connected, myDogeMask, drc20Ticker, drc20Amount]
-  );
+  const onAvailableDRC20 = useCallback(async () => {
+    if (!isConnected()) return;
+
+    try {
+      const txReqRes = await myDogeMask.requestAvailableDRC20Transaction({
+        ticker: drc20Ticker,
+        amount: drc20Amount,
+      });
+      console.log('request available drc-20 transfer result', txReqRes);
+      setTxId(txReqRes.txId);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [isConnected, myDogeMask, drc20Ticker, drc20Amount]);
 
   const txStatus = useCallback(async () => {
     if (txId) {
@@ -297,18 +291,22 @@ export default function Home() {
             ) : null}
             {drc20Available && drc20Available !== '0' && (
               <div className={styles.center}>
-                <button onClick={() => onTransferDRC20(true)}>
+                <button onClick={() => onAvailableDRC20()}>
                   Make Transferable
                 </button>
               </div>
             )}
             {drc20Transferable && drc20Transferable !== '0' && (
               <div className={styles.center}>
-                <button onClick={() => onTransferDRC20(false)}>
-                  Transfer DRC-20
+                <button onClick={() => onGetDRC20Inscriptions()}>
+                  Get Transferable DRC-20
                 </button>
               </div>
             )}
+            {drc20Inscriptions.length > 0 &&
+              (drc20Inscriptions as any[]).map((inscription) => (
+                <div key={inscription.output}>{inscription.output}</div>
+              ))}
           </div>
         )}
       </main>
