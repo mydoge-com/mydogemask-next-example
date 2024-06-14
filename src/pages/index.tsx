@@ -20,9 +20,10 @@ export default function Home() {
     'c788a88a04a649a5ba049ee7b23ce337a7304d1d0d37cc46108767095fb2d01a:0'
   );
   const [recipientAddress, setRecipientAddress] = useState(MDO_ADDRESS);
-  const [drc20TIcker, setDrc20Ticker] = useState('');
+  const [drc20Ticker, setDrc20Ticker] = useState('');
   const [drc20Available, setDrc20Available] = useState('');
   const [drc20Transferable, setDrc20Transferable] = useState('');
+  const [drc20Amount, setDrc20Amount] = useState('');
   const [myDogeMask, setMyDogeMask] = useState<any>();
 
   useEffect(() => {
@@ -144,7 +145,7 @@ export default function Home() {
 
     try {
       const balanceReq = await myDogeMask.getDRC20Balance({
-        ticker: drc20TIcker,
+        ticker: drc20Ticker,
       });
       console.log('request drc-20 balance result', balanceReq);
       setDrc20Available(balanceReq.availableBalance);
@@ -152,7 +153,33 @@ export default function Home() {
     } catch (e) {
       console.error(e);
     }
-  }, [connected, myDogeMask, drc20TIcker]);
+  }, [connected, myDogeMask, drc20Ticker]);
+
+  const onTransferDRC20 = useCallback(
+    async (available) => {
+      if (!myDogeMask?.isMyDogeMask) {
+        alert(`MyDogeMask not installed!`);
+        return;
+      }
+
+      if (!connected) {
+        alert(`MyDogeMask not connected!`);
+        return;
+      }
+
+      try {
+        const txReqRes = await myDogeMask.requestAvailableDRC20Transaction({
+          ticker: drc20Ticker,
+          amount: drc20Amount,
+        });
+        console.log('request available drc-20 transfer result', txReqRes);
+        setTxId(txReqRes.txId);
+      } catch (e) {
+        console.error(e);
+      }
+    },
+    [connected, myDogeMask, drc20Ticker, drc20Amount]
+  );
 
   const txStatus = useCallback(async () => {
     if (txId) {
@@ -221,7 +248,9 @@ export default function Home() {
                 setDoginalOutput(text.target.value);
               }}
             />
-            <div className={styles.center}>Doginal recipient address</div>
+            <div className={styles.center}>
+              Doginal/DRC-20 recipient address
+            </div>
             <input
               type='text'
               style={{ width: '265px' }}
@@ -237,7 +266,7 @@ export default function Home() {
             <input
               type='text'
               style={{ width: '35px' }}
-              value={drc20TIcker}
+              value={drc20Ticker}
               onChange={(text) => {
                 setDrc20Ticker(text.target.value);
               }}
@@ -245,8 +274,41 @@ export default function Home() {
             <div className={styles.center}>
               <button onClick={onGetDRC20Balance}>Get DRC-20 Balance</button>
             </div>
-            {drc20Available && <div className={styles.balance}>Available Balance: {drc20Available}</div>}
-            {drc20Transferable && <div className={styles.balance}>Transferable Balance: {drc20Transferable}</div>}
+            {drc20Available && (
+              <div className={styles.balance}>
+                Available Balance: {drc20Available}
+              </div>
+            )}
+            {drc20Transferable && (
+              <div className={styles.balance}>
+                Transferable Balance: {drc20Transferable}
+              </div>
+            )}
+            {drc20Available || drc20Transferable ? (
+              <input
+                type='text'
+                className={styles.balance}
+                style={{ width: '100px' }}
+                value={drc20Amount}
+                onChange={(text) => {
+                  setDrc20Amount(text.target.value);
+                }}
+              />
+            ) : null}
+            {drc20Available && drc20Available !== '0' && (
+              <div className={styles.center}>
+                <button onClick={() => onTransferDRC20(true)}>
+                  Make Transferable
+                </button>
+              </div>
+            )}
+            {drc20Transferable && drc20Transferable !== '0' && (
+              <div className={styles.center}>
+                <button onClick={() => onTransferDRC20(false)}>
+                  Transfer DRC-20
+                </button>
+              </div>
+            )}
           </div>
         )}
       </main>
