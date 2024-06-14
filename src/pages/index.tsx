@@ -305,7 +305,9 @@ export default function Home() {
             )}
             {drc20Inscriptions.length > 0 &&
               (drc20Inscriptions as any[]).map((inscription) => (
-                <div key={inscription.output}>{inscription.output}</div>
+                <div key={inscription.output}>
+                  {inscription.output} {inscription.ticker} {inscription.amount}
+                </div>
               ))}
           </div>
         )}
