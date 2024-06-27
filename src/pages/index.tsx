@@ -27,6 +27,7 @@ export default function Home() {
   const [drc20Amount, setDrc20Amount] = useState('');
   const [rawTx, setRawTx] = useState('');
   const [pbstIndex, setPbstIndex] = useState(0);
+  const [signMessage, setSignMessage] = useState('');
   const [myDogeMask, setMyDogeMask] = useState<any>();
 
   useEffect(() => {
@@ -208,6 +209,19 @@ export default function Home() {
     }
   }, [isConnected, myDogeMask, pbstIndex, rawTx]);
 
+  const onSignMessage = useCallback(async () => {
+    if (!isConnected()) return;
+
+    try {
+      const signMsgReq = await myDogeMask.signMessage({
+        message: signMessage,
+      });
+      console.log('request sign message result', signMsgReq);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [isConnected, myDogeMask, signMessage]);
+
   useInterval(txStatus, 10000, false);
 
   return (
@@ -326,7 +340,7 @@ export default function Home() {
                   {inscription.output} {inscription.ticker} {inscription.amount}
                 </div>
               ))}
-            <div className={styles.item}>Sign/Send PSBT</div>
+            <div className={styles.item}>Sign PSBT</div>
             <div className={styles.item}>Raw TX</div>
             <input
               type='text'
@@ -349,6 +363,19 @@ export default function Home() {
             />
             <div className={styles.center}>
               <button onClick={() => onSendPSBT()}>Send PSBT</button>
+            </div>
+            <div className={styles.item}>Sign Message</div>
+            <input
+              type='text'
+              className={styles.item}
+              style={{ width: '500px' }}
+              value={signMessage}
+              onChange={(text) => {
+                setSignMessage(text.target.value);
+              }}
+            />
+            <div className={styles.center}>
+              <button onClick={() => onSignMessage()}>Sign Message</button>
             </div>
           </div>
         )}
