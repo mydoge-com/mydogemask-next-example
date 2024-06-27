@@ -25,6 +25,8 @@ export default function Home() {
   const [drc20Transferable, setDrc20Transferable] = useState('');
   const [drc20Inscriptions, setDrc20Inscriptions] = useState<any[]>([]);
   const [drc20Amount, setDrc20Amount] = useState('');
+  const [rawTx, setRawTx] = useState('');
+  const [pbstIndex, setPbstIndex] = useState(0);
   const [myDogeMask, setMyDogeMask] = useState<any>();
 
   useEffect(() => {
@@ -191,6 +193,21 @@ export default function Home() {
     }
   }, [myDogeMask, txId]);
 
+  const onSendPSBT = useCallback(async () => {
+    if (!isConnected()) return;
+
+    try {
+      const txReqRes = await myDogeMask.requestPSBT({
+        rawTx,
+        index: pbstIndex,
+      });
+      console.log('request send psbt result', txReqRes);
+      setTxId(txReqRes.txId);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [isConnected, myDogeMask, pbstIndex, rawTx]);
+
   useInterval(txStatus, 10000, false);
 
   return (
@@ -202,14 +219,14 @@ export default function Home() {
         <link rel='icon' href='/favicon.ico' />
       </Head>
       <main className={styles.main}>
-        <div className={styles.description}>
+        <div className={styles.item}>
           <div>
             <a
               href='https://github.com/mydoge-com/myDogeMask'
               target='_blank'
               rel='noopener noreferrer'
             >
-              Checkout MyDogeMask
+              Checkout MyDoge Wallet Browser Extension on GitHub
               <Image
                 src='/github.svg'
                 alt='GitHub Logo'
@@ -224,15 +241,15 @@ export default function Home() {
         <div className={styles.center}>
           <button onClick={onConnect}>{btnText}</button>
         </div>
-        {connected && <div className={styles.address}>Address: {address}</div>}
-        {connected && <div className={styles.balance}>Balance: {balance}</div>}
         {connected && (
-          <div className={styles.center}>
-            <button onClick={onTip}>Tip MyDogeOfficial 4.20</button>
-          </div>
-        )}
-        {connected && (
-          <div className={styles.doginals}>
+          <div className={styles.container}>
+            <div className={styles.item}>Address: {address}</div>
+            <div className={styles.item}>Balance: {balance}</div>
+
+            <div className={styles.center}>
+              <button onClick={onTip}>Tip MyDogeOfficial 4.20</button>
+            </div>
+
             <div className={styles.center}>Doginal inscription output</div>
             <input
               type='text'
@@ -269,19 +286,19 @@ export default function Home() {
               <button onClick={onGetDRC20Balance}>Get DRC-20 Balance</button>
             </div>
             {drc20Available && (
-              <div className={styles.balance}>
+              <div className={styles.item}>
                 Available Balance: {drc20Available}
               </div>
             )}
             {drc20Transferable && (
-              <div className={styles.balance}>
+              <div className={styles.item}>
                 Transferable Balance: {drc20Transferable}
               </div>
             )}
             {drc20Available || drc20Transferable ? (
               <input
                 type='text'
-                className={styles.balance}
+                className={styles.item}
                 style={{ width: '100px' }}
                 value={drc20Amount}
                 onChange={(text) => {
@@ -309,6 +326,30 @@ export default function Home() {
                   {inscription.output} {inscription.ticker} {inscription.amount}
                 </div>
               ))}
+            <div className={styles.item}>Sign/Send PSBT</div>
+            <div className={styles.item}>Raw TX</div>
+            <input
+              type='text'
+              className={styles.item}
+              style={{ width: '500px' }}
+              value={rawTx}
+              onChange={(text) => {
+                setRawTx(text.target.value);
+              }}
+            />
+            <div className={styles.item}>Input Index</div>
+            <input
+              type='text'
+              className={styles.item}
+              style={{ width: '15px' }}
+              value={pbstIndex}
+              onChange={(text) => {
+                setPbstIndex(parseInt(text.target.value));
+              }}
+            />
+            <div className={styles.center}>
+              <button onClick={() => onSendPSBT()}>Send PSBT</button>
+            </div>
           </div>
         )}
       </main>
