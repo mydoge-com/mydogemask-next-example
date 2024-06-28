@@ -16,6 +16,10 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## JavaScript API
 
+### View the [documentation](https://mydoge-com.github.io/mydogemask/)
+
+### Example Integration
+
 ```typescript
 let myDogeMask = null;
 
