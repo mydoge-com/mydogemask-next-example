@@ -88,6 +88,27 @@ if (myDogeMask?.isMyDogeMask) {
     console.log('drc-20 transferable result', transferableRes);
     // { inscriptions: [{ "amount": "1000", "output": "68f08b2ad7dfd26192685e04a7038223fa0259e0878e1b636776104c1535bb9f:0" }], ticker: 'abcd', address: 'DLRAyAnjpP6tHtzT6D7MfpWuG1nEYvw9dA'}
 
+    // Request a transaction to inscribe a transfer of avaialble drc-20 balance
+    // Generates a popup to be confirmed by the user
+    // Promise will reject or onError will be called if canceled
+    const availableRes = await myDogeMask.requestAvailableDRC20Transaction({ ticker: 'abcd', amount: 1000, /*onSuccess, onError*/);
+    console.log('drc-20 request avaialable result', availableRes);
+    // { "txId": "b9fc04f226b194684fe24c786be89cae26abf8fcebbf90ff7049d5bc7fa003f0" }
+
+    // Request the signing of a psbt
+    // Generates a popup to be confirmed by the user
+    // Promise will reject or onError will be called if canceled
+    const psbtRes = await myDogeMask.requestPSBT({ rawTx: 'the raw tx hex', index: 1, /*onSuccess, onError*/);
+    console.log('psbt result', psbtRes);
+    // { "txId": "b9fc04f226b194684fe24c786be89cae26abf8fcebbf90ff7049d5bc7fa003f0" }
+
+    // Request the signing of an arbitrary message
+    // Generates a popup to be confirmed by the user
+    // Promise will reject or onError will be called if canceled
+    const signMessageRes = await myDogeMask.signMessage({ message: 'the message to sign', /*onSuccess, onError*/);
+    console.log('signed message result', signMessageRes);
+    // { "signedMessage": "b9fc04f226b194684fe24c786be89cae26abf8fcebbf90ff7049d5bc7fa003f0" }
+
     // Poll to get the transaction status
     setInterval(async () => {
       const txStatusRes = await myDogeMask.getTransactionStatus({
