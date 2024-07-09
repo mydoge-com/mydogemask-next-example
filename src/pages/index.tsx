@@ -26,7 +26,7 @@ export default function Home() {
   const [drc20Inscriptions, setDrc20Inscriptions] = useState<any[]>([]);
   const [drc20Amount, setDrc20Amount] = useState('');
   const [rawTx, setRawTx] = useState('');
-  const [pbstIndex, setPbstIndex] = useState(0);
+  const [pbstIndex, setPbstIndex] = useState(1);
   const [signMessage, setSignMessage] = useState('');
   const [myDogeMask, setMyDogeMask] = useState<any>();
 
@@ -358,7 +358,9 @@ export default function Home() {
               style={{ width: '15px' }}
               value={pbstIndex}
               onChange={(text) => {
-                setPbstIndex(parseInt(text.target.value));
+                if (!isNaN(Number(text?.target?.value))) {
+                  setPbstIndex(Number(text.target.value));
+                }
               }}
             />
             <div className={styles.center}>
