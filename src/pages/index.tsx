@@ -123,7 +123,7 @@ export default function Home() {
     if (!isConnected()) return;
 
     try {
-      const txReqRes = await myDogeMask.requestDoginalTransaction({
+      const txReqRes = await myDogeMask.requestInscriptionTransaction({
         recipientAddress,
         output: doginalOutput,
       });
