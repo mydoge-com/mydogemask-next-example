@@ -26,7 +26,7 @@ export default function Home() {
   const [drc20Inscriptions, setDrc20Inscriptions] = useState<any[]>([]);
   const [drc20Amount, setDrc20Amount] = useState('');
   const [rawTx, setRawTx] = useState('');
-  const [pbstIndex, setPbstIndex] = useState(1);
+  const [psbtIndexes, setPsbtIndexes] = useState([1, 2]);
   const [signMessage, setSignMessage] = useState('');
   const [myDogeMask, setMyDogeMask] = useState<any>();
 
@@ -200,14 +200,14 @@ export default function Home() {
     try {
       const txReqRes = await myDogeMask.requestPSBT({
         rawTx,
-        index: pbstIndex,
+        indexes: psbtIndexes,
       });
       console.log('request send psbt result', txReqRes);
       setTxId(txReqRes.txId);
     } catch (e) {
       console.error(e);
     }
-  }, [isConnected, myDogeMask, pbstIndex, rawTx]);
+  }, [isConnected, myDogeMask, psbtIndexes, rawTx]);
 
   const onSignMessage = useCallback(async () => {
     if (!isConnected()) return;
@@ -351,15 +351,16 @@ export default function Home() {
                 setRawTx(text.target.value);
               }}
             />
-            <div className={styles.item}>Input Index</div>
+            <div className={styles.item}>Input Indexes (csv)</div>
             <input
               type='text'
               className={styles.item}
-              style={{ width: '15px' }}
-              value={pbstIndex}
+              style={{ width: '150px' }}
+              value={psbtIndexes.join(',')}
               onChange={(text) => {
-                if (!isNaN(Number(text?.target?.value))) {
-                  setPbstIndex(Number(text.target.value));
+                if (text?.target?.value) {
+                  const indexes = text.target.value.split(',').map(Number);
+                  setPsbtIndexes(indexes);
                 }
               }}
             />
