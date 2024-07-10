@@ -213,7 +213,7 @@ export default function Home() {
     if (!isConnected()) return;
 
     try {
-      const signMsgReq = await myDogeMask.signMessage({
+      const signMsgReq = await myDogeMask.requestSignedMessage({
         message: signMessage,
       });
       console.log('request sign message result', signMsgReq);
