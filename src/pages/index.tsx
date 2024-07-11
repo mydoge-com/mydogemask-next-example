@@ -198,7 +198,7 @@ export default function Home() {
     if (!isConnected()) return;
 
     try {
-      const txReqRes = await myDogeMask.requestPSBT({
+      const txReqRes = await myDogeMask.requestPsbt({
         rawTx,
         indexes: psbtIndexes,
       });
