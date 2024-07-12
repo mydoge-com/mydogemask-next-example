@@ -99,10 +99,10 @@ if (myDogeMask?.isMyDogeMask) {
     console.log('drc-20 request avaialable result', availableRes);
     // { "txId": "b9fc04f226b194684fe24c786be89cae26abf8fcebbf90ff7049d5bc7fa003f0" }
 
-    // Request the signing of a psbt
+    // Request the signing/sending of a psbt
     // Generates a popup to be confirmed by the user
     // Promise will reject or onError will be called if canceled
-    const psbtRes = await myDogeMask.requestPSBT({ rawTx: 'the raw tx hex', index: 1, /*onSuccess, onError*/);
+    const psbtRes = await myDogeMask.requestPsbt({ rawTx: 'the raw tx hex', index: 1, /*onSuccess, onError*/);
     console.log('psbt result', psbtRes);
     // { "txId": "b9fc04f226b194684fe24c786be89cae26abf8fcebbf90ff7049d5bc7fa003f0" }
 
