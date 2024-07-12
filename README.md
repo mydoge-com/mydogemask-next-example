@@ -16,6 +16,10 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## JavaScript API
 
+### View the [documentation](https://mydoge-com.github.io/mydogemask/)
+
+### Example Integration
+
 ```typescript
 let myDogeMask = null;
 
@@ -63,6 +67,52 @@ if (myDogeMask?.isMyDogeMask) {
     console.log('request transaction result', txReqRes);
     // { "txId": "b9fc04f226b194684fe24c786be89cae26abf8fcebbf90ff7049d5bc7fa003f0" }
 
+    // Send an inscription doginal/drc-20
+    // Generates a popup to be confirmed by the user
+    // Promise will reject or onError will be called if canceled
+    const txReqRes = await myDogeMask.requesInscriptionTransaction(
+      {
+        recipientAddress: 'DAHkCF5LajV6jYyi5o4eMvtpqXRcm9eZYq',
+        output:
+          'c788a88a04a649a5ba049ee7b23ce337a7304d1d0d37cc46108767095fb2d01a:0', // The transaction id and output index separated by colon
+      }
+      // onSuccess,
+      // onError
+    );
+    console.log('request inscription transaction result', txReqRes);
+    // { "txId": "b9fc04f226b194684fe24c786be89cae26abf8fcebbf90ff7049d5bc7fa003f0" }
+
+    // Request connected address DRC-20 balance
+    const drc20BalanceRes = await myDogeMask.getDRC20Balance({ ticker: 'abcd', /*onSuccess, onError*/);
+    console.log('drc-20 balance result', drc20BalanceRes);
+    // { "address": "DBKwBLEDY96jBtx1xCmjfBzp9FrNCWxnmM", "availableBalance": "4206912345678", "transferableBalance": "12345678", "ticker": "abcd" }
+
+    // Request connected address transferable DRC-20 outputs
+    const transferableRes = await myDogeMask.getTransferableDRC20({ ticker: 'abcd', /*onSuccess, onError*/);
+    console.log('drc-20 transferable result', transferableRes);
+    // { inscriptions: [{ "amount": "1000", "output": "68f08b2ad7dfd26192685e04a7038223fa0259e0878e1b636776104c1535bb9f:0" }], ticker: 'abcd', address: 'DLRAyAnjpP6tHtzT6D7MfpWuG1nEYvw9dA'}
+
+    // Request a transaction to inscribe a transfer of avaialble drc-20 balance
+    // Generates a popup to be confirmed by the user
+    // Promise will reject or onError will be called if canceled
+    const availableRes = await myDogeMask.requestAvailableDRC20Transaction({ ticker: 'abcd', amount: 1000, /*onSuccess, onError*/);
+    console.log('drc-20 request avaialable result', availableRes);
+    // { "txId": "b9fc04f226b194684fe24c786be89cae26abf8fcebbf90ff7049d5bc7fa003f0" }
+
+    // Request the signing of a psbt
+    // Generates a popup to be confirmed by the user
+    // Promise will reject or onError will be called if canceled
+    const psbtRes = await myDogeMask.requestPSBT({ rawTx: 'the raw tx hex', index: 1, /*onSuccess, onError*/);
+    console.log('psbt result', psbtRes);
+    // { "txId": "b9fc04f226b194684fe24c786be89cae26abf8fcebbf90ff7049d5bc7fa003f0" }
+
+    // Request the signing of an arbitrary message
+    // Generates a popup to be confirmed by the user
+    // Promise will reject or onError will be called if canceled
+    const signMessageRes = await myDogeMask.signMessage({ message: 'the message to sign', /*onSuccess, onError*/);
+    console.log('signed message result', signMessageRes);
+    // { "signedMessage": "b9fc04f226b194684fe24c786be89cae26abf8fcebbf90ff7049d5bc7fa003f0" }
+
     // Poll to get the transaction status
     setInterval(async () => {
       const txStatusRes = await myDogeMask.getTransactionStatus({
@@ -86,9 +136,9 @@ if (myDogeMask?.isMyDogeMask) {
         .catch(console.error);
       console.log('connection status result', connectionStatusRes);
       // { "connected": true, "address": "DBKwBLEDY96jBtx1xCmjfBzp9FrNCWxnmM" }
-      
+
       if (!connectionStatusRes?.connected) {
-        console.log('disconnected')   
+        console.log('disconnected');
       }
     }, 10000);
 
