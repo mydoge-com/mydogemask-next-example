@@ -171,7 +171,7 @@ export default function Home() {
         ticker: drc20Ticker,
         amount: drc20Amount,
       });
-      console.log('request available drc-20 transfer result', txReqRes);
+      console.log('request available drc-20 tx result', txReqRes);
       setTxId(txReqRes.txId);
     } catch (e) {
       console.error(e);
