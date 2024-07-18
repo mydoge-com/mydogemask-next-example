@@ -142,6 +142,7 @@ export default function Home() {
         ticker: drc20Ticker,
       });
       console.log('request drc-20 balance result', balanceReq);
+      setDrc20Inscriptions([]);
       setDrc20Available(balanceReq.availableBalance);
       setDrc20Transferable(balanceReq.transferableBalance);
     } catch (e) {
