@@ -28,20 +28,20 @@ export default function Home() {
   const [rawTx, setRawTx] = useState('');
   const [psbtIndexes, setPsbtIndexes] = useState([1, 2]);
   const [signMessage, setSignMessage] = useState('');
-  const [myDogeMask, setMyDogeMask] = useState<any>();
+  const [myDogeMask, setMyDoge] = useState<any>();
 
   useEffect(() => {
     function onInit() {
       const { doge } = window as any;
-      setMyDogeMask(doge);
+      setMyDoge(doge);
       window.removeEventListener('doge#initialized', onInit);
     }
     window.addEventListener('doge#initialized', onInit, { once: true });
   }, []);
 
   const onConnect = useCallback(async () => {
-    if (!myDogeMask?.isMyDogeMask) {
-      alert(`MyDogeMask not installed!`);
+    if (!myDogeMask?.isMyDoge) {
+      alert(`MyDoge not installed!`);
       return;
     }
 
@@ -91,13 +91,13 @@ export default function Home() {
   useInterval(checkConnection, 5000, false);
 
   const isConnected = useCallback(() => {
-    if (!myDogeMask?.isMyDogeMask) {
-      alert(`MyDogeMask not installed!`);
+    if (!myDogeMask?.isMyDoge) {
+      alert(`MyDoge not installed!`);
       return false;
     }
 
     if (!connected) {
-      alert(`MyDogeMask not connected!`);
+      alert(`MyDoge not connected!`);
       return false;
     }
 
@@ -228,7 +228,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>MyDogeMask</title>
+        <title>MyDoge</title>
         <meta name='description' content='Sample integration' />
         <meta name='viewport' content='width=device-width, initial-scale=1' />
         <link rel='icon' href='/favicon.ico' />
