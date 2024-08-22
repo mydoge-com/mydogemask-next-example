@@ -28,26 +28,46 @@ export default function Home() {
   const [rawTx, setRawTx] = useState('');
   const [psbtIndexes, setPsbtIndexes] = useState([1, 2]);
   const [signMessage, setSignMessage] = useState('');
-  const [myDogeMask, setMyDoge] = useState<any>();
+  const [myDoge, setMyDoge] = useState<any>();
+  const intervalRef = useRef<any>();
 
   useEffect(() => {
-    function onInit() {
-      const { doge } = window as any;
-      setMyDoge(doge);
-      window.removeEventListener('doge#initialized', onInit);
+    if (!myDoge) {
+      const onInit = () => {
+        const { doge } = window as any;
+        setMyDoge(doge);
+        window.removeEventListener('doge#initialized', onInit);
+        console.log('MyDoge API injected from event');
+      };
+      window.addEventListener('doge#initialized', onInit, { once: true });
     }
-    window.addEventListener('doge#initialized', onInit, { once: true });
-  }, []);
+  }, [myDoge]);
+
+  // Handle dev edge case where component mounts after MyDoge is initialized
+  useEffect(() => {
+    if (!myDoge && !intervalRef.current) {
+      intervalRef.current = setInterval(() => {
+        const { doge } = window as any;
+        if (doge?.isMyDoge) {
+          setMyDoge(doge);
+          clearInterval(intervalRef.current);
+          console.log('MyDoge API injected from interval');
+        } else {
+          console.log('MyDoge API not injected');
+        }
+      }, 1000);
+    }
+  }, [myDoge]);
 
   const onConnect = useCallback(async () => {
-    if (!myDogeMask?.isMyDoge) {
+    if (!myDoge?.isMyDoge) {
       alert(`MyDoge not installed!`);
       return;
     }
 
     try {
       if (connected) {
-        const disconnectRes = await myDogeMask.disconnect();
+        const disconnectRes = await myDoge.disconnect();
         console.log('disconnect result', disconnectRes);
         if (disconnectRes.disconnected) {
           setConnected(false);
@@ -57,25 +77,25 @@ export default function Home() {
         return;
       }
 
-      const connectRes = await myDogeMask.connect();
+      const connectRes = await myDoge.connect();
       console.log('connect result', connectRes);
       if (connectRes.approved) {
         setConnected(true);
         setAddress(connectRes.address);
         setBtnText('Disconnect');
 
-        const balanceRes = await myDogeMask.getBalance();
+        const balanceRes = await myDoge.getBalance();
         console.log('balance result', balanceRes);
         setBalance(sb.toBitcoin(balanceRes.balance));
       }
     } catch (e) {
       console.error(e);
     }
-  }, [connected, myDogeMask]);
+  }, [connected, myDoge]);
 
   const checkConnection = useCallback(async () => {
     if (connected) {
-      const connectionStatusRes = await myDogeMask
+      const connectionStatusRes = await myDoge
         .getConnectionStatus()
         .catch(console.error);
       console.log('connection status result', connectionStatusRes);
@@ -86,12 +106,12 @@ export default function Home() {
         setBtnText('Connect');
       }
     }
-  }, [connected, myDogeMask]);
+  }, [connected, myDoge]);
 
   useInterval(checkConnection, 5000, false);
 
   const isConnected = useCallback(() => {
-    if (!myDogeMask?.isMyDoge) {
+    if (!myDoge?.isMyDoge) {
       alert(`MyDoge not installed!`);
       return false;
     }
@@ -102,13 +122,13 @@ export default function Home() {
     }
 
     return true;
-  }, [connected, myDogeMask]);
+  }, [connected, myDoge]);
 
   const onTip = useCallback(async () => {
     if (!isConnected()) return;
 
     try {
-      const txReqRes = await myDogeMask.requestTransaction({
+      const txReqRes = await myDoge.requestTransaction({
         recipientAddress: MDO_ADDRESS,
         dogeAmount: 4.2,
       });
@@ -117,13 +137,13 @@ export default function Home() {
     } catch (e) {
       console.error(e);
     }
-  }, [isConnected, myDogeMask]);
+  }, [isConnected, myDoge]);
 
   const onSendDoginal = useCallback(async () => {
     if (!isConnected()) return;
 
     try {
-      const txReqRes = await myDogeMask.requestInscriptionTransaction({
+      const txReqRes = await myDoge.requestInscriptionTransaction({
         recipientAddress,
         output: doginalOutput,
       });
@@ -132,13 +152,13 @@ export default function Home() {
     } catch (e) {
       console.error(e);
     }
-  }, [isConnected, myDogeMask, recipientAddress, doginalOutput]);
+  }, [isConnected, myDoge, recipientAddress, doginalOutput]);
 
   const onGetDRC20Balance = useCallback(async () => {
     if (!isConnected()) return;
 
     try {
-      const balanceReq = await myDogeMask.getDRC20Balance({
+      const balanceReq = await myDoge.getDRC20Balance({
         ticker: drc20Ticker,
       });
       console.log('request drc-20 balance result', balanceReq);
@@ -148,13 +168,13 @@ export default function Home() {
     } catch (e) {
       console.error(e);
     }
-  }, [isConnected, myDogeMask, drc20Ticker]);
+  }, [isConnected, myDoge, drc20Ticker]);
 
   const onGetDRC20Inscriptions = useCallback(async () => {
     if (!isConnected()) return;
 
     try {
-      const transferableReq = await myDogeMask.getTransferableDRC20({
+      const transferableReq = await myDoge.getTransferableDRC20({
         ticker: drc20Ticker,
       });
       console.log('request drc-20 transferable result', transferableReq);
@@ -162,13 +182,13 @@ export default function Home() {
     } catch (e) {
       console.error(e);
     }
-  }, [isConnected, myDogeMask, drc20Ticker]);
+  }, [isConnected, myDoge, drc20Ticker]);
 
   const onAvailableDRC20 = useCallback(async () => {
     if (!isConnected()) return;
 
     try {
-      const txReqRes = await myDogeMask.requestAvailableDRC20Transaction({
+      const txReqRes = await myDoge.requestAvailableDRC20Transaction({
         ticker: drc20Ticker,
         amount: drc20Amount,
       });
@@ -177,29 +197,29 @@ export default function Home() {
     } catch (e) {
       console.error(e);
     }
-  }, [isConnected, myDogeMask, drc20Ticker, drc20Amount]);
+  }, [isConnected, myDoge, drc20Ticker, drc20Amount]);
 
   const txStatus = useCallback(async () => {
     if (txId) {
-      const txStatusRes = await myDogeMask.getTransactionStatus({
+      const txStatusRes = await myDoge.getTransactionStatus({
         txId,
       });
       console.log('transaction status result', txStatusRes);
       // Once confirmed, stop polling and update balance
       if (txStatusRes.status === 'confirmed' && txStatusRes.confirmations > 1) {
-        const balanceRes = await myDogeMask.getBalance();
+        const balanceRes = await myDoge.getBalance();
         console.log('balance result', balanceRes);
         setBalance(sb.toBitcoin(balanceRes.balance));
         setTxId('');
       }
     }
-  }, [myDogeMask, txId]);
+  }, [myDoge, txId]);
 
   const onSendPSBT = useCallback(async () => {
     if (!isConnected()) return;
 
     try {
-      const txReqRes = await myDogeMask.requestPsbt({
+      const txReqRes = await myDoge.requestPsbt({
         rawTx,
         indexes: psbtIndexes,
       });
@@ -208,20 +228,20 @@ export default function Home() {
     } catch (e) {
       console.error(e);
     }
-  }, [isConnected, myDogeMask, psbtIndexes, rawTx]);
+  }, [isConnected, myDoge, psbtIndexes, rawTx]);
 
   const onSignMessage = useCallback(async () => {
     if (!isConnected()) return;
 
     try {
-      const signMsgReq = await myDogeMask.requestSignedMessage({
+      const signMsgReq = await myDoge.requestSignedMessage({
         message: signMessage,
       });
       console.log('request sign message result', signMsgReq);
     } catch (e) {
       console.error(e);
     }
-  }, [isConnected, myDogeMask, signMessage]);
+  }, [isConnected, myDoge, signMessage]);
 
   useInterval(txStatus, 10000, false);
 
@@ -237,7 +257,7 @@ export default function Home() {
         <div className={styles.item}>
           <div>
             <a
-              href='https://github.com/mydoge-com/myDogeMask'
+              href='https://github.com/mydoge-com/mydogemask'
               target='_blank'
               rel='noopener noreferrer'
             >
