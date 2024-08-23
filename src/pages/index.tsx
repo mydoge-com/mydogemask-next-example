@@ -28,6 +28,7 @@ export default function Home() {
   const [rawTx, setRawTx] = useState('');
   const [psbtIndexes, setPsbtIndexes] = useState([1, 2]);
   const [signMessage, setSignMessage] = useState('');
+  const [decryptMessage, setDecryptMessage] = useState('');
   const [myDoge, setMyDoge] = useState<any>();
   const intervalRef = useRef<any>();
 
@@ -158,13 +159,13 @@ export default function Home() {
     if (!isConnected()) return;
 
     try {
-      const balanceReq = await myDoge.getDRC20Balance({
+      const balanceRes = await myDoge.getDRC20Balance({
         ticker: drc20Ticker,
       });
-      console.log('request drc-20 balance result', balanceReq);
+      console.log('request drc-20 balance result', balanceRes);
       setDrc20Inscriptions([]);
-      setDrc20Available(balanceReq.availableBalance);
-      setDrc20Transferable(balanceReq.transferableBalance);
+      setDrc20Available(balanceRes.availableBalance);
+      setDrc20Transferable(balanceRes.transferableBalance);
     } catch (e) {
       console.error(e);
     }
@@ -174,11 +175,11 @@ export default function Home() {
     if (!isConnected()) return;
 
     try {
-      const transferableReq = await myDoge.getTransferableDRC20({
+      const transferableRes = await myDoge.getTransferableDRC20({
         ticker: drc20Ticker,
       });
-      console.log('request drc-20 transferable result', transferableReq);
-      setDrc20Inscriptions(transferableReq.inscriptions);
+      console.log('request drc-20 transferable result', transferableRes);
+      setDrc20Inscriptions(transferableRes.inscriptions);
     } catch (e) {
       console.error(e);
     }
@@ -234,14 +235,27 @@ export default function Home() {
     if (!isConnected()) return;
 
     try {
-      const signMsgReq = await myDoge.requestSignedMessage({
+      const signMsgRes = await myDoge.requestSignedMessage({
         message: signMessage,
       });
-      console.log('request sign message result', signMsgReq);
+      console.log('request sign message result', signMsgRes);
     } catch (e) {
       console.error(e);
     }
   }, [isConnected, myDoge, signMessage]);
+
+  const onDecryptMessage = useCallback(async () => {
+    if (!isConnected()) return;
+
+    try {
+      const decryptMsgRes = await myDoge.requestDecryptedMessage({
+        message: decryptMessage,
+      });
+      console.log('request decrypt message result', decryptMsgRes);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [isConnected, myDoge, decryptMessage]);
 
   useInterval(txStatus, 10000, false);
 
@@ -400,6 +414,21 @@ export default function Home() {
             />
             <div className={styles.center}>
               <button onClick={() => onSignMessage()}>Sign Message</button>
+            </div>
+            <div className={styles.item}>Decrypt Message</div>
+            <input
+              type='text'
+              className={styles.item}
+              style={{ width: '500px' }}
+              value={decryptMessage}
+              onChange={(text) => {
+                setDecryptMessage(text.target.value);
+              }}
+            />
+            <div className={styles.center}>
+              <button onClick={() => onDecryptMessage()}>
+                Decrypt Message
+              </button>
             </div>
           </div>
         )}
