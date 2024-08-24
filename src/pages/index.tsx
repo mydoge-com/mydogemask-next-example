@@ -16,9 +16,7 @@ export default function Home() {
   const [address, setAddress] = useState(false);
   const [balance, setBalance] = useState(0);
   const [txId, setTxId] = useState('');
-  const [doginalOutput, setDoginalOutput] = useState(
-    'c788a88a04a649a5ba049ee7b23ce337a7304d1d0d37cc46108767095fb2d01a:0'
-  );
+  const [doginalLocation, setDoginalLocation] = useState('');
   const [recipientAddress, setRecipientAddress] = useState(MDO_ADDRESS);
   const [drc20Ticker, setDrc20Ticker] = useState('');
   const [drc20Available, setDrc20Available] = useState('');
@@ -146,14 +144,14 @@ export default function Home() {
     try {
       const txReqRes = await myDoge.requestInscriptionTransaction({
         recipientAddress,
-        output: doginalOutput,
+        location: doginalLocation,
       });
       console.log('request doginal transaction result', txReqRes);
       setTxId(txReqRes.txId);
     } catch (e) {
       console.error(e);
     }
-  }, [isConnected, myDoge, recipientAddress, doginalOutput]);
+  }, [isConnected, myDoge, recipientAddress, doginalLocation]);
 
   const onGetDRC20Balance = useCallback(async () => {
     if (!isConnected()) return;
@@ -299,13 +297,15 @@ export default function Home() {
               <button onClick={onTip}>Tip MyDogeOfficial 4.20</button>
             </div>
 
-            <div className={styles.center}>Doginal inscription output</div>
+            <div className={styles.center}>
+              Doginal inscription location (txid:vout:offset)
+            </div>
             <input
               type='text'
               style={{ width: '485px' }}
-              value={doginalOutput}
+              value={doginalLocation}
               onChange={(text) => {
-                setDoginalOutput(text.target.value);
+                setDoginalLocation(text.target.value);
               }}
             />
             <div className={styles.center}>
