@@ -16,7 +16,7 @@ export default function Home() {
   const [address, setAddress] = useState(false);
   const [balance, setBalance] = useState(0);
   const [txId, setTxId] = useState('');
-  const [doginalLocation, setDoginalLocation] = useState('');
+  const [inscriptionLocation, setinscriptionLocation] = useState('');
   const [recipientAddress, setRecipientAddress] = useState(MDO_ADDRESS);
   const [drc20Ticker, setDrc20Ticker] = useState('');
   const [drc20Available, setDrc20Available] = useState('');
@@ -138,20 +138,20 @@ export default function Home() {
     }
   }, [isConnected, myDoge]);
 
-  const onSendDoginal = useCallback(async () => {
+  const onSendInscription = useCallback(async () => {
     if (!isConnected()) return;
 
     try {
       const txReqRes = await myDoge.requestInscriptionTransaction({
         recipientAddress,
-        location: doginalLocation,
+        location: inscriptionLocation,
       });
-      console.log('request doginal transaction result', txReqRes);
+      console.log('request inscription transaction result', txReqRes);
       setTxId(txReqRes.txId);
     } catch (e) {
       console.error(e);
     }
-  }, [isConnected, myDoge, recipientAddress, doginalLocation]);
+  }, [isConnected, myDoge, recipientAddress, inscriptionLocation]);
 
   const onGetDRC20Balance = useCallback(async () => {
     if (!isConnected()) return;
@@ -298,19 +298,17 @@ export default function Home() {
             </div>
 
             <div className={styles.center}>
-              Doginal inscription location (txid:vout:offset)
+              Inscription location (Doginal/DRC-20) (txid:vout:offset)
             </div>
             <input
               type='text'
               style={{ width: '485px' }}
-              value={doginalLocation}
+              value={inscriptionLocation}
               onChange={(text) => {
-                setDoginalLocation(text.target.value);
+                setinscriptionLocation(text.target.value);
               }}
             />
-            <div className={styles.center}>
-              Doginal/DRC-20 recipient address
-            </div>
+            <div className={styles.center}>Inscription recipient address</div>
             <input
               type='text'
               style={{ width: '265px' }}
@@ -320,7 +318,7 @@ export default function Home() {
               }}
             />
             <div className={styles.center}>
-              <button onClick={onSendDoginal}>Send Doginal</button>
+              <button onClick={onSendInscription}>Send Inscription</button>
             </div>
             <div className={styles.center}>DRC-20 Ticker</div>
             <input
@@ -371,11 +369,12 @@ export default function Home() {
             )}
             {drc20Inscriptions.length > 0 &&
               (drc20Inscriptions as any[]).map((inscription) => (
-                <div key={inscription.output}>
-                  {inscription.output} {inscription.ticker} {inscription.amount}
+                <div key={inscription.location}>
+                  {inscription.location} {inscription.ticker}{' '}
+                  {inscription.amount}
                 </div>
               ))}
-            <div className={styles.item}>Sign PSBT</div>
+            <div className={styles.item}>Send PSBT</div>
             <div className={styles.item}>Raw TX</div>
             <input
               type='text'
