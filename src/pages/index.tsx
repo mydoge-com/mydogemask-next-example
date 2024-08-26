@@ -16,9 +16,7 @@ export default function Home() {
   const [address, setAddress] = useState(false);
   const [balance, setBalance] = useState(0);
   const [txId, setTxId] = useState('');
-  const [doginalOutput, setDoginalOutput] = useState(
-    'c788a88a04a649a5ba049ee7b23ce337a7304d1d0d37cc46108767095fb2d01a:0'
-  );
+  const [inscriptionLocation, setinscriptionLocation] = useState('');
   const [recipientAddress, setRecipientAddress] = useState(MDO_ADDRESS);
   const [drc20Ticker, setDrc20Ticker] = useState('');
   const [drc20Available, setDrc20Available] = useState('');
@@ -28,26 +26,47 @@ export default function Home() {
   const [rawTx, setRawTx] = useState('');
   const [psbtIndexes, setPsbtIndexes] = useState([1, 2]);
   const [signMessage, setSignMessage] = useState('');
-  const [myDogeMask, setMyDoge] = useState<any>();
+  const [decryptMessage, setDecryptMessage] = useState('');
+  const [myDoge, setMyDoge] = useState<any>();
+  const intervalRef = useRef<any>();
 
   useEffect(() => {
-    function onInit() {
-      const { doge } = window as any;
-      setMyDoge(doge);
-      window.removeEventListener('doge#initialized', onInit);
+    if (!myDoge) {
+      const onInit = () => {
+        const { doge } = window as any;
+        setMyDoge(doge);
+        window.removeEventListener('doge#initialized', onInit);
+        console.log('MyDoge API injected from event');
+      };
+      window.addEventListener('doge#initialized', onInit, { once: true });
     }
-    window.addEventListener('doge#initialized', onInit, { once: true });
-  }, []);
+  }, [myDoge]);
+
+  // Handle dev edge case where component mounts after MyDoge is initialized
+  useEffect(() => {
+    if (!myDoge && !intervalRef.current) {
+      intervalRef.current = setInterval(() => {
+        const { doge } = window as any;
+        if (doge?.isMyDoge) {
+          setMyDoge(doge);
+          clearInterval(intervalRef.current);
+          console.log('MyDoge API injected from interval');
+        } else {
+          console.log('MyDoge API not injected');
+        }
+      }, 1000);
+    }
+  }, [myDoge]);
 
   const onConnect = useCallback(async () => {
-    if (!myDogeMask?.isMyDoge) {
+    if (!myDoge?.isMyDoge) {
       alert(`MyDoge not installed!`);
       return;
     }
 
     try {
       if (connected) {
-        const disconnectRes = await myDogeMask.disconnect();
+        const disconnectRes = await myDoge.disconnect();
         console.log('disconnect result', disconnectRes);
         if (disconnectRes.disconnected) {
           setConnected(false);
@@ -57,25 +76,25 @@ export default function Home() {
         return;
       }
 
-      const connectRes = await myDogeMask.connect();
+      const connectRes = await myDoge.connect();
       console.log('connect result', connectRes);
       if (connectRes.approved) {
         setConnected(true);
         setAddress(connectRes.address);
         setBtnText('Disconnect');
 
-        const balanceRes = await myDogeMask.getBalance();
+        const balanceRes = await myDoge.getBalance();
         console.log('balance result', balanceRes);
         setBalance(sb.toBitcoin(balanceRes.balance));
       }
     } catch (e) {
       console.error(e);
     }
-  }, [connected, myDogeMask]);
+  }, [connected, myDoge]);
 
   const checkConnection = useCallback(async () => {
     if (connected) {
-      const connectionStatusRes = await myDogeMask
+      const connectionStatusRes = await myDoge
         .getConnectionStatus()
         .catch(console.error);
       console.log('connection status result', connectionStatusRes);
@@ -86,12 +105,12 @@ export default function Home() {
         setBtnText('Connect');
       }
     }
-  }, [connected, myDogeMask]);
+  }, [connected, myDoge]);
 
   useInterval(checkConnection, 5000, false);
 
   const isConnected = useCallback(() => {
-    if (!myDogeMask?.isMyDoge) {
+    if (!myDoge?.isMyDoge) {
       alert(`MyDoge not installed!`);
       return false;
     }
@@ -102,13 +121,13 @@ export default function Home() {
     }
 
     return true;
-  }, [connected, myDogeMask]);
+  }, [connected, myDoge]);
 
   const onTip = useCallback(async () => {
     if (!isConnected()) return;
 
     try {
-      const txReqRes = await myDogeMask.requestTransaction({
+      const txReqRes = await myDoge.requestTransaction({
         recipientAddress: MDO_ADDRESS,
         dogeAmount: 4.2,
       });
@@ -117,58 +136,58 @@ export default function Home() {
     } catch (e) {
       console.error(e);
     }
-  }, [isConnected, myDogeMask]);
+  }, [isConnected, myDoge]);
 
-  const onSendDoginal = useCallback(async () => {
+  const onSendInscription = useCallback(async () => {
     if (!isConnected()) return;
 
     try {
-      const txReqRes = await myDogeMask.requestInscriptionTransaction({
+      const txReqRes = await myDoge.requestInscriptionTransaction({
         recipientAddress,
-        output: doginalOutput,
+        location: inscriptionLocation,
       });
-      console.log('request doginal transaction result', txReqRes);
+      console.log('request inscription transaction result', txReqRes);
       setTxId(txReqRes.txId);
     } catch (e) {
       console.error(e);
     }
-  }, [isConnected, myDogeMask, recipientAddress, doginalOutput]);
+  }, [isConnected, myDoge, recipientAddress, inscriptionLocation]);
 
   const onGetDRC20Balance = useCallback(async () => {
     if (!isConnected()) return;
 
     try {
-      const balanceReq = await myDogeMask.getDRC20Balance({
+      const balanceRes = await myDoge.getDRC20Balance({
         ticker: drc20Ticker,
       });
-      console.log('request drc-20 balance result', balanceReq);
+      console.log('request drc-20 balance result', balanceRes);
       setDrc20Inscriptions([]);
-      setDrc20Available(balanceReq.availableBalance);
-      setDrc20Transferable(balanceReq.transferableBalance);
+      setDrc20Available(balanceRes.availableBalance);
+      setDrc20Transferable(balanceRes.transferableBalance);
     } catch (e) {
       console.error(e);
     }
-  }, [isConnected, myDogeMask, drc20Ticker]);
+  }, [isConnected, myDoge, drc20Ticker]);
 
   const onGetDRC20Inscriptions = useCallback(async () => {
     if (!isConnected()) return;
 
     try {
-      const transferableReq = await myDogeMask.getTransferableDRC20({
+      const transferableRes = await myDoge.getTransferableDRC20({
         ticker: drc20Ticker,
       });
-      console.log('request drc-20 transferable result', transferableReq);
-      setDrc20Inscriptions(transferableReq.inscriptions);
+      console.log('request drc-20 transferable result', transferableRes);
+      setDrc20Inscriptions(transferableRes.inscriptions);
     } catch (e) {
       console.error(e);
     }
-  }, [isConnected, myDogeMask, drc20Ticker]);
+  }, [isConnected, myDoge, drc20Ticker]);
 
   const onAvailableDRC20 = useCallback(async () => {
     if (!isConnected()) return;
 
     try {
-      const txReqRes = await myDogeMask.requestAvailableDRC20Transaction({
+      const txReqRes = await myDoge.requestAvailableDRC20Transaction({
         ticker: drc20Ticker,
         amount: drc20Amount,
       });
@@ -177,29 +196,29 @@ export default function Home() {
     } catch (e) {
       console.error(e);
     }
-  }, [isConnected, myDogeMask, drc20Ticker, drc20Amount]);
+  }, [isConnected, myDoge, drc20Ticker, drc20Amount]);
 
   const txStatus = useCallback(async () => {
     if (txId) {
-      const txStatusRes = await myDogeMask.getTransactionStatus({
+      const txStatusRes = await myDoge.getTransactionStatus({
         txId,
       });
       console.log('transaction status result', txStatusRes);
       // Once confirmed, stop polling and update balance
       if (txStatusRes.status === 'confirmed' && txStatusRes.confirmations > 1) {
-        const balanceRes = await myDogeMask.getBalance();
+        const balanceRes = await myDoge.getBalance();
         console.log('balance result', balanceRes);
         setBalance(sb.toBitcoin(balanceRes.balance));
         setTxId('');
       }
     }
-  }, [myDogeMask, txId]);
+  }, [myDoge, txId]);
 
   const onSendPSBT = useCallback(async () => {
     if (!isConnected()) return;
 
     try {
-      const txReqRes = await myDogeMask.requestPsbt({
+      const txReqRes = await myDoge.requestPsbt({
         rawTx,
         indexes: psbtIndexes,
       });
@@ -208,20 +227,33 @@ export default function Home() {
     } catch (e) {
       console.error(e);
     }
-  }, [isConnected, myDogeMask, psbtIndexes, rawTx]);
+  }, [isConnected, myDoge, psbtIndexes, rawTx]);
 
   const onSignMessage = useCallback(async () => {
     if (!isConnected()) return;
 
     try {
-      const signMsgReq = await myDogeMask.requestSignedMessage({
+      const signMsgRes = await myDoge.requestSignedMessage({
         message: signMessage,
       });
-      console.log('request sign message result', signMsgReq);
+      console.log('request sign message result', signMsgRes);
     } catch (e) {
       console.error(e);
     }
-  }, [isConnected, myDogeMask, signMessage]);
+  }, [isConnected, myDoge, signMessage]);
+
+  const onDecryptMessage = useCallback(async () => {
+    if (!isConnected()) return;
+
+    try {
+      const decryptMsgRes = await myDoge.requestDecryptedMessage({
+        message: decryptMessage,
+      });
+      console.log('request decrypt message result', decryptMsgRes);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [isConnected, myDoge, decryptMessage]);
 
   useInterval(txStatus, 10000, false);
 
@@ -237,7 +269,7 @@ export default function Home() {
         <div className={styles.item}>
           <div>
             <a
-              href='https://github.com/mydoge-com/myDogeMask'
+              href='https://github.com/mydoge-com/mydogemask'
               target='_blank'
               rel='noopener noreferrer'
             >
@@ -265,18 +297,18 @@ export default function Home() {
               <button onClick={onTip}>Tip MyDogeOfficial 4.20</button>
             </div>
 
-            <div className={styles.center}>Doginal inscription output</div>
+            <div className={styles.center}>
+              Inscription location (Doginal/DRC-20) (txid:vout:offset)
+            </div>
             <input
               type='text'
               style={{ width: '485px' }}
-              value={doginalOutput}
+              value={inscriptionLocation}
               onChange={(text) => {
-                setDoginalOutput(text.target.value);
+                setinscriptionLocation(text.target.value);
               }}
             />
-            <div className={styles.center}>
-              Doginal/DRC-20 recipient address
-            </div>
+            <div className={styles.center}>Inscription recipient address</div>
             <input
               type='text'
               style={{ width: '265px' }}
@@ -286,7 +318,7 @@ export default function Home() {
               }}
             />
             <div className={styles.center}>
-              <button onClick={onSendDoginal}>Send Doginal</button>
+              <button onClick={onSendInscription}>Send Inscription</button>
             </div>
             <div className={styles.center}>DRC-20 Ticker</div>
             <input
@@ -337,11 +369,12 @@ export default function Home() {
             )}
             {drc20Inscriptions.length > 0 &&
               (drc20Inscriptions as any[]).map((inscription) => (
-                <div key={inscription.output}>
-                  {inscription.output} {inscription.ticker} {inscription.amount}
+                <div key={inscription.location}>
+                  {inscription.location} {inscription.ticker}{' '}
+                  {inscription.amount}
                 </div>
               ))}
-            <div className={styles.item}>Sign PSBT</div>
+            <div className={styles.item}>Send PSBT</div>
             <div className={styles.item}>Raw TX</div>
             <input
               type='text'
@@ -380,6 +413,21 @@ export default function Home() {
             />
             <div className={styles.center}>
               <button onClick={() => onSignMessage()}>Sign Message</button>
+            </div>
+            <div className={styles.item}>Decrypt Message</div>
+            <input
+              type='text'
+              className={styles.item}
+              style={{ width: '500px' }}
+              value={decryptMessage}
+              onChange={(text) => {
+                setDecryptMessage(text.target.value);
+              }}
+            />
+            <div className={styles.center}>
+              <button onClick={() => onDecryptMessage()}>
+                Decrypt Message
+              </button>
             </div>
           </div>
         )}
