@@ -216,14 +216,19 @@ export default function Home() {
 
   const onSendPSBT = useCallback(async () => {
     if (!isConnected()) return;
+    const signOnly = true;
 
     try {
       const txReqRes = await myDoge.requestPsbt({
         rawTx,
         indexes: psbtIndexes,
+        signOnly, // Optionally return the signed transaction instead of broadcasting
       });
       console.log('request send psbt result', txReqRes);
-      setTxId(txReqRes.txId);
+
+      if (!signOnly) {
+        setTxId(txReqRes.txId);
+      }
     } catch (e) {
       console.error(e);
     }
