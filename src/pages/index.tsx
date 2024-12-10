@@ -25,7 +25,7 @@ export default function Home() {
   const [drc20Amount, setDrc20Amount] = useState('');
   const [dunesTicker, setDunesTicker] = useState('');
   const [dunesBalance, setDunesBalance] = useState('');
-  // const [drc20Amount, setDrc20Amount] = useState('');
+  const [dunesAmount, setDunesAmount] = useState('');
   const [rawTx, setRawTx] = useState('');
   const [psbtIndexes, setPsbtIndexes] = useState([1, 2]);
   const [signMessage, setSignMessage] = useState('');
@@ -215,6 +215,22 @@ export default function Home() {
       console.error(e);
     }
   }, [isConnected, myDoge, dunesTicker]);
+
+  const onSendDunes = useCallback(async () => {
+    if (!isConnected()) return;
+
+    try {
+      const txReqRes = await myDoge.requestDunesTransaction({
+        ticker: dunesTicker,
+        recipientAddress,
+        amount: dunesAmount,
+      });
+      console.log('request dunes transaction result', txReqRes);
+      setTxId(txReqRes.txId);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [isConnected, myDoge, recipientAddress, dunesTicker, dunesAmount]);
 
   const txStatus = useCallback(async () => {
     if (txId) {
@@ -411,7 +427,32 @@ export default function Home() {
               <button onClick={onGetDunesBalance}>Get Dunes Balance</button>
             </div>
             {dunesBalance && (
-              <div className={styles.item}>Dunes Balance: {dunesBalance}</div>
+              <div className={styles.container}>
+                <div className={styles.item}>Dunes Balance: {dunesBalance}</div>
+                <div className={styles.item}>Dunes Recipient Address</div>
+                <input
+                  className={styles.item}
+                  type='text'
+                  style={{ width: '265px' }}
+                  value={recipientAddress}
+                  onChange={(text) => {
+                    setRecipientAddress(text.target.value);
+                  }}
+                />
+                <div className={styles.item}>Dunes Amount</div>
+                <input
+                  type='text'
+                  className={styles.item}
+                  style={{ width: '100px' }}
+                  value={dunesAmount}
+                  onChange={(text) => {
+                    setDunesAmount(text.target.value);
+                  }}
+                />
+                <button className={styles.item} onClick={onSendDunes}>
+                  Send Dunes
+                </button>
+              </div>
             )}
             --------------------------------------------------------------------
             <div className={styles.item}>Send PSBT</div>
