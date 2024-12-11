@@ -332,7 +332,7 @@ export default function Home() {
             <div className={styles.item}>Address: {address}</div>
             <div className={styles.item}>Balance: {balance}</div>
             <div className={styles.center}>
-              <button onClick={onTip}>Tip MyDogeOfficial 4.20</button>
+              <button onClick={onTip}>Tip MyDoge Team 4.20</button>
             </div>
             --------------------------------------------------------------------
             <div className={styles.center}>
