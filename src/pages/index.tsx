@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import Image from 'next/image';
 import sb from 'satoshi-bitcoin';
-import { Inter } from "next/font/google";
+import { Inter } from 'next/font/google';
 import styles from '@/styles/Home.module.css';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -23,6 +23,9 @@ export default function Home() {
   const [drc20Transferable, setDrc20Transferable] = useState('');
   const [drc20Inscriptions, setDrc20Inscriptions] = useState<any[]>([]);
   const [drc20Amount, setDrc20Amount] = useState('');
+  const [dunesTicker, setDunesTicker] = useState('');
+  const [dunesBalance, setDunesBalance] = useState('');
+  const [dunesAmount, setDunesAmount] = useState('');
   const [rawTx, setRawTx] = useState('');
   const [psbtIndexes, setPsbtIndexes] = useState([1, 2]);
   const [signMessage, setSignMessage] = useState('');
@@ -198,6 +201,37 @@ export default function Home() {
     }
   }, [isConnected, myDoge, drc20Ticker, drc20Amount]);
 
+  const onGetDunesBalance = useCallback(async () => {
+    if (!isConnected()) return;
+
+    try {
+      const balanceRes = await myDoge.getDunesBalance({
+        ticker: dunesTicker,
+      });
+      console.log('request dunes balance result', balanceRes);
+
+      setDunesBalance(balanceRes.balance);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [isConnected, myDoge, dunesTicker]);
+
+  const onSendDunes = useCallback(async () => {
+    if (!isConnected()) return;
+
+    try {
+      const txReqRes = await myDoge.requestDunesTransaction({
+        ticker: dunesTicker,
+        recipientAddress,
+        amount: dunesAmount,
+      });
+      console.log('request dunes transaction result', txReqRes);
+      setTxId(txReqRes.txId);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [isConnected, myDoge, recipientAddress, dunesTicker, dunesAmount]);
+
   const txStatus = useCallback(async () => {
     if (txId) {
       const txStatusRes = await myDoge.getTransactionStatus({
@@ -297,11 +331,10 @@ export default function Home() {
           <div className={styles.container}>
             <div className={styles.item}>Address: {address}</div>
             <div className={styles.item}>Balance: {balance}</div>
-
             <div className={styles.center}>
-              <button onClick={onTip}>Tip MyDogeOfficial 4.20</button>
+              <button onClick={onTip}>Tip MyDoge Team 4.20</button>
             </div>
-
+            --------------------------------------------------------------------
             <div className={styles.center}>
               Inscription location (Doginal/DRC-20) (txid:vout:offset)
             </div>
@@ -325,6 +358,7 @@ export default function Home() {
             <div className={styles.center}>
               <button onClick={onSendInscription}>Send Inscription</button>
             </div>
+            --------------------------------------------------------------------
             <div className={styles.center}>DRC-20 Ticker</div>
             <input
               type='text'
@@ -379,6 +413,48 @@ export default function Home() {
                   {inscription.amount}
                 </div>
               ))}
+            --------------------------------------------------------------------
+            <div className={styles.center}>Dunes Ticker</div>
+            <input
+              type='text'
+              style={{ width: '130px' }}
+              value={dunesTicker}
+              onChange={(text) => {
+                setDunesTicker(text.target.value);
+              }}
+            />
+            <div className={styles.center}>
+              <button onClick={onGetDunesBalance}>Get Dunes Balance</button>
+            </div>
+            {dunesBalance && (
+              <div className={styles.container}>
+                <div className={styles.item}>Dunes Balance: {dunesBalance}</div>
+                <div className={styles.item}>Dunes Recipient Address</div>
+                <input
+                  className={styles.item}
+                  type='text'
+                  style={{ width: '265px' }}
+                  value={recipientAddress}
+                  onChange={(text) => {
+                    setRecipientAddress(text.target.value);
+                  }}
+                />
+                <div className={styles.item}>Dunes Amount</div>
+                <input
+                  type='text'
+                  className={styles.item}
+                  style={{ width: '100px' }}
+                  value={dunesAmount}
+                  onChange={(text) => {
+                    setDunesAmount(text.target.value);
+                  }}
+                />
+                <button className={styles.item} onClick={onSendDunes}>
+                  Send Dunes
+                </button>
+              </div>
+            )}
+            --------------------------------------------------------------------
             <div className={styles.item}>Send PSBT</div>
             <div className={styles.item}>Raw TX</div>
             <input
@@ -406,6 +482,7 @@ export default function Home() {
             <div className={styles.center}>
               <button onClick={() => onSendPSBT()}>Send PSBT</button>
             </div>
+            --------------------------------------------------------------------
             <div className={styles.item}>Sign Message</div>
             <input
               type='text'
@@ -419,6 +496,7 @@ export default function Home() {
             <div className={styles.center}>
               <button onClick={() => onSignMessage()}>Sign Message</button>
             </div>
+            --------------------------------------------------------------------
             <div className={styles.item}>Decrypt Message</div>
             <input
               type='text'
